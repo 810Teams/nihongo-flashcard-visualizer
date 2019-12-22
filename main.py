@@ -9,19 +9,20 @@ import sqlite3
 
 
 def main():
-    conn = create_connection('Flashcards.sqlite')
-    rows = select_progress(conn)
+    rows = select_progress(create_connection('Flashcards.sqlite'))
+    data = [rows.count(i) for i in range(0, max(rows) + 1)]
 
-    render(rows)
+    render(data)
 
     print()
     print('- Flashcard Statistics -')
     print()
     print('Total: {}'.format(len(rows)))
+    print('Average: {:.0f}-{:.2f}'.format(average(data)//3 + 1, average(data) % 3))
     print()
 
-    for i in range(max(rows), -1, -1):
-        print('Level {}-{}: {}'.format(i//3 + 1, i % 3, rows.count(i)))
+    for i in range(len(data) - 1, -1, -1):
+        print('Level {}-{}: {}'.format(i//3 + 1, i % 3, data[i]))
 
     print()
 
@@ -46,6 +47,10 @@ def select_progress(conn):
     return rows
 
 
+def average(data):
+    return sum([data[i] * i for i in range(len(data))]) / sum(data)
+
+
 def render(data):
     chart = pygal.Bar()
 
@@ -54,11 +59,9 @@ def render(data):
 
     chart.style = CleanStyle
 
-    chart.add('Learned Words', [data.count(i)
-                                for i in range(0, max(data) + 1)])
+    chart.add('Learned Words', data)
 
-    chart.x_labels = ['{}-{}'.format(i//3 + 1, i % 3)
-                      for i in range(0, max(data) + 1)]
+    chart.x_labels = ['{}-{}'.format(i//3 + 1, i % 3) for i in range(len(data))]
 
     chart.render_to_file('chart.svg')
 
