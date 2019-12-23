@@ -131,3 +131,5 @@ dmypy.json
 # Custom
 .DS_Store
 *.sqlite
+*.svg
+Nihongo Backups
