@@ -86,15 +86,11 @@ def render(data):
     return
 
 
-def calculate_y_labels(data_min, data_max, allow_float=False, max_y_labels=15):
+def calculate_y_labels(data_min, data_max, max_y_labels=15):
     ''' Function: Calculate y labels '''
     data_min = floor(data_min)
     data_max = ceil(data_max)
     
-    if allow_float:
-        data_min *= 100
-        data_max *= 100
-
     preset = 1, 2, 5
     data_range = list(range(0, data_min - 1, -1)) + list(range(0, data_max + 1, 1))
     i = 0
@@ -105,9 +101,6 @@ def calculate_y_labels(data_min, data_max, allow_float=False, max_y_labels=15):
         i += 1
         
     data_range.sort()
-
-    if allow_float:
-        data_range = [i/100 for i in data_range]
 
     return data_range
 
