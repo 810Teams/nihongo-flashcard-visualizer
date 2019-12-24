@@ -12,8 +12,13 @@ import pygal
 import sqlite3
 
 
+DATABASE_FILENAME = 'Flashcards.sqlite'
+
+
 def main():
-    raw_data = sorted(select_progress(create_connection('Flashcards.sqlite')))
+    extract()
+
+    raw_data = sorted(select_progress(create_connection()))
     data = [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
 
     render(data)
@@ -34,10 +39,17 @@ def main():
     print()
 
 
-def create_connection(db_file):
+def extract():
+    try:
+        os.system('unzip -o NihongoBackup.nihongodata/{}.zip'.format(DATABASE_FILENAME))
+    except (FileNotFoundError, OSError, PermissionError):
+        print('[ERROR] Extraction error.')
+
+
+def create_connection():
     conn = None
     try:
-        conn = sqlite3.connect(db_file)
+        conn = sqlite3.connect('{}'.format(DATABASE_FILENAME))
     except:
         print('Error')
 
@@ -100,7 +112,7 @@ def render(data):
     try:
         os.system('open chart.svg')
     except (FileNotFoundError, OSError, PermissionError):
-        print('[ERROR] Something unexpected happened, please try again.')
+        print('[ERROR] Chart file opening error.')
 
 
 def calculate_y_labels(data_min, data_max, max_y_labels=15):
