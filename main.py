@@ -4,6 +4,7 @@
 
 from math import ceil
 from math import floor
+from math import sqrt
 from pygal.style import CleanStyle
 
 import os
@@ -12,16 +13,19 @@ import sqlite3
 
 
 def main():
-    rows = select_progress(create_connection('Flashcards.sqlite'))
-    data = [rows.count(i) for i in range(0, max(rows) + 1)]
+    raw_data = sorted(select_progress(create_connection('Flashcards.sqlite')))
+    data = [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
 
     render(data)
 
     print()
     print('- Flashcard Statistics -')
     print()
-    print('Total: {}'.format(len(rows)))
-    print('Average: {:.0f}-{:.0f} (+{:.2f})'.format(average(data) // 3 + 1, floor(average(data) % 3), average(data) % 3))
+    print('Total: {}'.format(len(raw_data)))
+    print()
+    print('Median: {}'.format(get_level_format(median(raw_data))))
+    print('Average: {}'.format(get_level_format(average(raw_data))))
+    print('Standard Deviation: {}'.format(get_level_format(standard_deviation(raw_data))))
     print()
 
     for i in range(len(data) - 1, -1, -1):
@@ -49,16 +53,29 @@ def select_progress(conn):
     return rows
 
 
-def average(data):
-    return sum([data[i] * i for i in range(len(data))]) / sum(data)
+def get_level_format(level_value):
+    return '{:.0f}-{:.0f} (+{:.2f})'.format(level_value // 3 + 1, floor(level_value % 3), level_value % 1)
+
+
+def median(raw_data):
+    raw_data.sort()
+    if len(raw_data) % 2 == 0:
+        return (raw_data[len(raw_data) // 2 - 1] + raw_data[len(raw_data) // 2])/2
+    return raw_data[len(raw_data) // 2]
+
+
+def average(raw_data):
+    return sum(raw_data) / len(raw_data)
+
+
+def standard_deviation(raw_data):
+    return sqrt(sum([(i - average(raw_data)) ** 2 for i in raw_data])/len(raw_data))
 
 
 def render(data):
-    chart = pygal.Bar()
+    chart = pygal.HorizontalBar()
 
     # Chart Data
-    # for i in range(0, ceil(len(data)/3)):
-    #     chart.add('Level {}'.format(i), data[i*3: i*3 + 3])
     chart.add('Learned Words', data)
 
     # Chart Titles
@@ -79,11 +96,11 @@ def render(data):
     chart.style = CleanStyle
     chart.render_to_file('chart.svg')
 
+    # Chart Open
     try:
         os.system('open chart.svg')
     except (FileNotFoundError, OSError, PermissionError):
         print('[ERROR] Something unexpected happened, please try again.')
-    return
 
 
 def calculate_y_labels(data_min, data_max, max_y_labels=15):
