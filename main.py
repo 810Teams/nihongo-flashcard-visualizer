@@ -34,7 +34,7 @@ def main():
     print()
 
     for i in range(len(data) - 1, -1, -1):
-        print('Level {}-{}: {}'.format(i//3 + 1, i % 3, data[i]))
+        print('Level {}-{}: {}\t({:.2f}%)'.format(i // 3 + 1, i % 3, data[i], data[i] / sum(data) * 100))
 
     print()
 
