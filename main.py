@@ -1,5 +1,8 @@
 '''
-    `nihongo.py`
+    Nihongo - Japanese Dictionary Application
+    Flashcard Progress Visualizer
+
+    by Teerapat Kraisrisirikul
 '''
 
 from math import ceil
@@ -13,12 +16,14 @@ import sqlite3
 
 
 DATABASE_FILENAME = 'Flashcards.sqlite'
+VERSION = '0.8.0'
 
 
 def main():
+    ''' Function: Main function '''
     extract()
 
-    raw_data = sorted(select_progress(create_connection()))
+    raw_data = sorted(get_progress(create_connection()))
     data = [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
 
     render(data)
@@ -28,9 +33,11 @@ def main():
     print()
     print('Total: {}'.format(len(raw_data)))
     print()
-    print('Median: {}'.format(get_level_format(median(raw_data))))
-    print('Average: {}'.format(get_level_format(average(raw_data))))
-    print('Standard Deviation: {}'.format(get_level_format(standard_deviation(raw_data))))
+    print('Median: {}'.format(level_format(median(raw_data))))
+    print('Average: {}'.format(level_format(average(raw_data))))
+    print('Standard Deviation: {}'.format(level_format(standard_dev(raw_data))))
+    print()
+    print('Estimated Per Day: {:.0f} ({:.2f}%)'.format(estimated(data), estimated(data)/len(raw_data)*100))
     print()
 
     for i in range(len(data) - 1, -1, -1):
@@ -40,6 +47,7 @@ def main():
 
 
 def extract():
+    ''' Function: Extracts database file from the zip '''
     try:
         os.system('unzip -o NihongoBackup.nihongodata/{}.zip'.format(DATABASE_FILENAME))
     except (FileNotFoundError, OSError, PermissionError):
@@ -47,29 +55,31 @@ def extract():
 
 
 def create_connection():
+    ''' Function: Creates the database connection '''
     conn = None
     try:
         conn = sqlite3.connect('{}'.format(DATABASE_FILENAME))
     except:
-        print('Error')
+        print('[ERROR] Database connection error.')
 
     return conn
 
 
-def select_progress(conn):
+def get_progress(conn):
+    ''' Function: Gets flashcard progress from database '''
     cur = conn.cursor()
     cur.execute('SELECT ZPROGRESS, Z8_BECAMEACTIVEVIAFLASHCARDPACK FROM ZFLASHCARD')
 
-    rows = [i[0] for i in cur.fetchall() if i[1] != None]
-
-    return rows
+    return [i[0] for i in cur.fetchall() if i[1] != None]
 
 
-def get_level_format(level_value):
+def level_format(level_value):
+    ''' Function: Get a level format from a level value '''
     return '{:.0f}-{:.0f} (+{:.2f})'.format(level_value // 3 + 1, floor(level_value % 3), level_value % 1)
 
 
 def median(raw_data):
+    ''' Function: Calculates median '''
     raw_data.sort()
     if len(raw_data) % 2 == 0:
         return (raw_data[len(raw_data) // 2 - 1] + raw_data[len(raw_data) // 2])/2
@@ -77,14 +87,27 @@ def median(raw_data):
 
 
 def average(raw_data):
+    ''' Function: Calculates average '''
     return sum(raw_data) / len(raw_data)
 
 
-def standard_deviation(raw_data):
+def standard_dev(raw_data):
+    ''' Function: Calculates standard deviation '''
     return sqrt(sum([(i - average(raw_data)) ** 2 for i in raw_data])/len(raw_data))
 
 
+def estimated(data):
+    ''' Function: Calculates estimated flashcards per day '''
+    value = 0
+
+    for i in range(len(data[:12])):
+        value += data[i] / 7 ** (i/3)
+
+    return value
+
+
 def render(data):
+    ''' Function: Renders the chart '''
     chart = pygal.HorizontalBar()
 
     # Chart Data
@@ -96,7 +119,7 @@ def render(data):
     # Chart Data
     chart.x_labels = ['{}-{}'.format(i//3 + 1, i % 3)
                       for i in range(len(data))]
-    chart.y_labels = calculate_y_labels(min(data), max(data))
+    chart.y_labels = y_labels(min(data), max(data))
     
     # Chart Legends
     chart.show_legend = False
@@ -115,8 +138,8 @@ def render(data):
         print('[ERROR] Chart file opening error.')
 
 
-def calculate_y_labels(data_min, data_max, max_y_labels=15):
-    ''' Function: Calculate y labels '''
+def y_labels(data_min, data_max, max_y_labels=15):
+    ''' Function: Calculates y labels of the chart '''
     data_min = floor(data_min)
     data_max = ceil(data_max)
     
