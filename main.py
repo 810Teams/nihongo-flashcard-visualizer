@@ -40,23 +40,34 @@ def main():
 
     raw_data = sorted(get_progress(create_connection()))
     data = [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
+    review = [sum(i) for i in estimated(data, days=365)]
+    print(review)
 
-    render(data)
+    # render(data)
 
     print()
-    print('- Flashcard Statistics -')
+    print('-- Flashcard Statistics --')
     print()
-    print('Total: {}'.format(len(raw_data)))
+    print(' - General Stats -')
     print()
-    print('Median: {}'.format(level_format(median(raw_data), initial_level=1)))
-    print('Average: {}'.format(level_format(average(raw_data), initial_level=1)))
-    print('Standard Deviation: {}'.format(level_format(standard_dev(raw_data), initial_level=0)))
+    print('   Total: {}'.format(len(raw_data)))
+    print('   Median: {}'.format(level_format(median(raw_data), initial_level=1)))
+    print('   Average: {}'.format(level_format(average(raw_data), initial_level=1)))
+    print('   Standard Deviation: {}'.format(level_format(standard_dev(raw_data), initial_level=0)))
     print()
-    print('Estimated Per Day: {:.0f} ({:.2f}%)'.format(estimated(data), estimated(data) / len(raw_data) * 100))
+    print(' - Level Stats -')
     print()
 
     for i in range(len(data) - 1, -1, -1):
-        print('Level {}-{}: {}\t({:.2f}%)'.format(i // 3 + 1, i % 3, data[i], data[i] / sum(data) * 100))
+        print('   Level {}-{}: {} ({:.2f}%)'.format(i // 3 + 1, i % 3, data[i], data[i] / sum(data) * 100))
+
+    print()
+    print(' - Estimated Flashcard Reviews -')
+    print()
+    print('   {:4d} day: {:.0f} ({:.2f}%)'.format(1, review[0], review[0] / len(raw_data) * 100))
+
+    for i in (2, 3, 4, 5, 6, 7, 14, 21, 30, 60, 90, 180, 270, 365):
+        print('   {:3d} days: {:.0f} ({:.2f}%)'.format(i, review[i - 1], review[i - 1] / len(raw_data) * 100))
 
     print()
 
@@ -111,9 +122,38 @@ def standard_dev(raw_data):
     return sqrt(sum([(i - average(raw_data)) ** 2 for i in raw_data])/len(raw_data))
 
 
-def estimated(data):
+def estimated(data, days=1):
     ''' Function: Calculates estimated flashcards per day '''
-    return sum([data[i] / (1, 2, 3, 7, 14, 21, 30, 60, 90, 180, 270, 360, None)[i] for i in range(len(data[:12]))])
+    level_weight = 1, 2, 3, 7, 14, 21, 30, 60, 90, 180, 270, 360, None          # Level weight
+    data_copy = [i for i in data] + [0] * (13 - len(data))                      # A copy of data
+    last_subtractor = [data_copy[i] / level_weight[i] for i in range(12)] + [0] # Lastest subtractor
+    is_added = [False for _ in range(13)]                                       # Is added
+
+    reviewed = list()
+
+    for _ in range(days):
+        reviewed.append([0 for _ in range(12)])
+
+        for i in range(1, 12):
+            if is_added[i]:
+                last_subtractor[i] = data_copy[i] / level_weight[i]
+                is_added[i] = False
+        
+        for i in range(12):
+            subtractor = max(min(last_subtractor[i], data_copy[i]), 0) # Purpose: To limit the subtractor and prevent references
+            data_copy[i] -= subtractor
+
+            # Condition: Check if a cell reaches zero
+            if data_copy[i] == 0:
+                last_subtractor[i] = 0
+
+            # Condition: Check if a cell is actually reduced to the lower integer completely
+            if ceil(data_copy[i]) != ceil(data_copy[i] + subtractor):
+                reviewed[-1][i] = abs(ceil(data_copy[i]) - ceil(data_copy[i] + subtractor))
+                data_copy[i + 1] += abs(ceil(data_copy[i]) - ceil(data_copy[i] + subtractor))
+                is_added[i + 1] = True
+    
+    return reviewed
 
 
 def render(data):
