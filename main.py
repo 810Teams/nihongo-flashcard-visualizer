@@ -31,7 +31,7 @@ import sqlite3
 
 DATABASE_CONTAINER = 'NihongoBackup.nihongodata'
 DATABASE_FILE = 'Flashcards.sqlite'
-VERSION = 'pre1.0.0-a'
+VERSION = 'pre1.0.0-b'
 
 
 def main():
@@ -40,9 +40,9 @@ def main():
 
     raw_data = sorted(get_progress(create_connection()))
     data = [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
-    review = [sum(i) for i in estimated(data, days=30)]
+    # review = [sum(i) for i in estimated(data, days=30)]
 
-    render(data)
+    render(data, days=180, learn_period=1, learn_each_period=10)
 
     print()
     print('-- Flashcard Statistics --')
@@ -62,14 +62,14 @@ def main():
         print('   Level {}-{}: {} ({:.2f}%)'.format(i // 3 + 1, i % 3, data[i], data[i] / sum(data) * 100))
 
     print()
-    print(' - Estimated Flashcard Reviews -')
-    print()
-    print('   {:3d} day : {:.0f} ({:.2f}%)'.format(1, review[0], review[0] / len(raw_data) * 100))
+    # print(' - Estimated Flashcard Reviews -')
+    # print()
+    # print('   {:3d} day : {:.0f} ({:.2f}%)'.format(1, review[0], review[0] / len(raw_data) * 100))
 
-    for i in (2, 3, 7, 30):
-        print('   {:3d} days: {:.0f} ({:.2f}%)'.format(i, review[i - 1], review[i - 1] / len(raw_data) * 100))
+    # for i in (2, 3, 7, 30):
+    #     print('   {:3d} days: {:.0f} ({:.2f}%)'.format(i, review[i - 1], review[i - 1] / len(raw_data) * 100))
     
-    print()
+    # print()
 
 
 def extract():
@@ -122,7 +122,7 @@ def standard_dev(raw_data):
     return sqrt(sum([(i - average(raw_data)) ** 2 for i in raw_data])/len(raw_data))
 
 
-def estimated(data, days=1, learn_period=1, learn_each_period=10, result='flashcard'):
+def estimated(data, days=7, learn_period=1, learn_each_period=0, result='flashcard'):
     ''' Function: Calculates estimated flashcards per day '''
     level_weight = 1, 2, 3, 7, 14, 21, 30, 60, 90, 180, 270, 360, None          # Level weight
     data_copy = [i for i in data] + [0] * (13 - len(data))                      # A copy of data
@@ -166,12 +166,12 @@ def estimated(data, days=1, learn_period=1, learn_each_period=10, result='flashc
         return vocab_size
 
 
-def render(data, days=90, learn_period=1, learn_each_period=10):
+def render(data, days=7, learn_period=1, learn_each_period=0):
     ''' Function: Renders the chart '''
     render_word_by_level(data)
     render_estimated(data, days=days, title='flashcard',  mode='single',   learn_period=learn_period, learn_each_period=learn_each_period)
-    render_estimated(data, days=days, title='flashcard',  mode='multiple', learn_period=learn_period, learn_each_period=learn_each_period)
-    render_estimated(data, days=days, title='flashcard',  mode='stacked',  learn_period=learn_period, learn_each_period=learn_each_period)
+    # render_estimated(data, days=days, title='flashcard',  mode='multiple', learn_period=learn_period, learn_each_period=learn_each_period)
+    # render_estimated(data, days=days, title='flashcard',  mode='stacked',  learn_period=learn_period, learn_each_period=learn_each_period)
     # render_estimated(data, days=days, title='vocabulary', mode='single',   learn_period=learn_period, learn_each_period=learn_each_period)
     # render_estimated(data, days=days, title='vocabulary', mode='multiple', learn_period=learn_period, learn_each_period=learn_each_period)
     # render_estimated(data, days=days, title='vocabulary', mode='stacked',  learn_period=learn_period, learn_each_period=learn_each_period)
