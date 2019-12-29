@@ -8,15 +8,30 @@
 from math import ceil
 from math import floor
 from math import sqrt
+from pygal.style import DefaultStyle
+from pygal.style import DarkStyle
+from pygal.style import NeonStyle
+from pygal.style import DarkSolarizedStyle
+from pygal.style import LightSolarizedStyle
+from pygal.style import LightStyle
 from pygal.style import CleanStyle
+from pygal.style import RedBlueStyle
+from pygal.style import DarkColorizedStyle
+from pygal.style import LightColorizedStyle
+from pygal.style import TurquoiseStyle
+from pygal.style import LightGreenStyle
+from pygal.style import DarkGreenStyle
+from pygal.style import DarkGreenBlueStyle
+from pygal.style import BlueStyle
 
 import os
 import pygal
 import sqlite3
 
 
-DATABASE_FILENAME = 'Flashcards.sqlite'
-VERSION = '0.8.0'
+DATABASE_CONTAINER = 'NihongoBackup.nihongodata'
+DATABASE_FILE = 'Flashcards.sqlite'
+VERSION = '0.8.1'
 
 
 def main():
@@ -49,7 +64,7 @@ def main():
 def extract():
     ''' Function: Extracts database file from the zip '''
     try:
-        os.system('unzip -o NihongoBackup.nihongodata/{}.zip'.format(DATABASE_FILENAME))
+        os.system('unzip -o {}/{}.zip'.format(DATABASE_CONTAINER, DATABASE_FILE))
     except (FileNotFoundError, OSError, PermissionError):
         print('[ERROR] Extraction error.')
 
@@ -58,7 +73,7 @@ def create_connection():
     ''' Function: Creates the database connection '''
     conn = None
     try:
-        conn = sqlite3.connect('{}'.format(DATABASE_FILENAME))
+        conn = sqlite3.connect('{}'.format(DATABASE_FILE))
     except:
         print('[ERROR] Database connection error.')
 
@@ -80,10 +95,10 @@ def level_format(level_value):
 
 def median(raw_data):
     ''' Function: Calculates median '''
-    raw_data.sort()
-    if len(raw_data) % 2 == 0:
-        return (raw_data[len(raw_data) // 2 - 1] + raw_data[len(raw_data) // 2])/2
-    return raw_data[len(raw_data) // 2]
+    raw_data_copy = sorted([i for i in raw_data])
+    if len(raw_data_copy) % 2 == 0:
+        return (raw_data_copy[len(raw_data_copy) // 2 - 1] + raw_data_copy[len(raw_data_copy) // 2])/2
+    return raw_data_copy[len(raw_data_copy) // 2]
 
 
 def average(raw_data):
@@ -98,12 +113,7 @@ def standard_dev(raw_data):
 
 def estimated(data):
     ''' Function: Calculates estimated flashcards per day '''
-    value = 0
-
-    for i in range(len(data[:12])):
-        value += data[i] / 7 ** (i/3)
-
-    return value
+    return sum([data[i] / (1, 2, 3, 7, 14, 21, 30, 60, 90, 180, 270, 360, None)[i] for i in range(len(data[:12]))])
 
 
 def render(data):
@@ -128,7 +138,7 @@ def render(data):
     chart.legend_box_size = 16
 
     # Chart Render
-    chart.style = CleanStyle
+    chart.style = DarkStyle
     chart.render_to_file('chart.svg')
 
     # Chart Open
