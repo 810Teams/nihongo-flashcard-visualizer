@@ -31,7 +31,7 @@ import sqlite3
 
 DATABASE_CONTAINER = 'NihongoBackup.nihongodata'
 DATABASE_FILE = 'Flashcards.sqlite'
-VERSION = '0.8.1'
+VERSION = '0.8.2'
 
 
 def main():
@@ -48,11 +48,11 @@ def main():
     print()
     print('Total: {}'.format(len(raw_data)))
     print()
-    print('Median: {}'.format(level_format(median(raw_data))))
-    print('Average: {}'.format(level_format(average(raw_data))))
-    print('Standard Deviation: {}'.format(level_format(standard_dev(raw_data))))
+    print('Median: {}'.format(level_format(median(raw_data), initial_level=1)))
+    print('Average: {}'.format(level_format(average(raw_data), initial_level=1)))
+    print('Standard Deviation: {}'.format(level_format(standard_dev(raw_data), initial_level=0)))
     print()
-    print('Estimated Per Day: {:.0f} ({:.2f}%)'.format(estimated(data), estimated(data)/len(raw_data)*100))
+    print('Estimated Per Day: {:.0f} ({:.2f}%)'.format(estimated(data), estimated(data) / len(raw_data) * 100))
     print()
 
     for i in range(len(data) - 1, -1, -1):
@@ -88,16 +88,16 @@ def get_progress(conn):
     return [i[0] for i in cur.fetchall() if i[1] != None]
 
 
-def level_format(level_value):
+def level_format(level_value, initial_level=1):
     ''' Function: Get a level format from a level value '''
-    return '{:.0f}-{:.0f} (+{:.2f})'.format(level_value // 3 + 1, floor(level_value % 3), level_value % 1)
+    return '{:.0f}-{:.0f} (+{:.2f})'.format(level_value // 3 + initial_level, floor(level_value % 3), level_value % 1)
 
 
 def median(raw_data):
     ''' Function: Calculates median '''
     raw_data_copy = sorted([i for i in raw_data])
     if len(raw_data_copy) % 2 == 0:
-        return (raw_data_copy[len(raw_data_copy) // 2 - 1] + raw_data_copy[len(raw_data_copy) // 2])/2
+        return (raw_data_copy[len(raw_data_copy) // 2 - 1] + raw_data_copy[len(raw_data_copy) // 2]) / 2
     return raw_data_copy[len(raw_data_copy) // 2]
 
 
@@ -127,15 +127,11 @@ def render(data):
     chart.title = 'Learned Words by Level'
 
     # Chart Data
-    chart.x_labels = ['{}-{}'.format(i//3 + 1, i % 3)
-                      for i in range(len(data))]
+    chart.x_labels = ['{}-{}'.format(i // 3 + 1, i % 3) for i in range(len(data))]
     chart.y_labels = y_labels(min(data), max(data))
     
     # Chart Legends
     chart.show_legend = False
-    chart.legend_at_bottom = True
-    chart.legend_at_bottom_columns = 5
-    chart.legend_box_size = 16
 
     # Chart Render
     chart.style = DarkStyle
@@ -158,8 +154,8 @@ def y_labels(data_min, data_max, max_y_labels=15):
     i = 0
 
     while len(data_range) > max_y_labels:
-        data_range = list(range(0, data_min - preset[i % 3] * 10**(i // 3), -1 * preset[i % 3] * 10**(i // 3)))
-        data_range += list(range(0, data_max + preset[i % 3] * 10**(i // 3), preset[i % 3] * 10**(i // 3)))
+        data_range = list(range(0, data_min - preset[i % 3] * 10 ** (i // 3), -1 * preset[i % 3] * 10 ** (i // 3)))
+        data_range += list(range(0, data_max + preset[i % 3] * 10 ** (i // 3), preset[i % 3] * 10 ** (i // 3)))
         i += 1
         
     data_range.sort()
