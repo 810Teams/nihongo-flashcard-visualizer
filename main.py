@@ -31,7 +31,7 @@ import sqlite3
 
 DATABASE_CONTAINER = 'NihongoBackup.nihongodata'
 DATABASE_FILE = 'Flashcards.sqlite'
-VERSION = '0.8.2'
+VERSION = 'v0.9.1'
 
 
 def main():
