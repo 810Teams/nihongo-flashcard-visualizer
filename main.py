@@ -31,7 +31,7 @@ import sqlite3
 
 DATABASE_CONTAINER = 'NihongoBackup.nihongodata'
 DATABASE_FILE = 'Flashcards.sqlite'
-VERSION = 'pre1.0.0-b'
+VERSION = 'pre1.0.0-c'
 
 
 def main():
@@ -40,9 +40,8 @@ def main():
 
     raw_data = sorted(get_progress(create_connection()))
     data = [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
-    # review = [sum(i) for i in estimated(data, days=30)]
 
-    render(data, days=180, learn_period=1, learn_each_period=10)
+    render(data, days=365)
 
     print()
     print('-- Flashcard Statistics --')
@@ -62,14 +61,6 @@ def main():
         print('   Level {}-{}: {} ({:.2f}%)'.format(i // 3 + 1, i % 3, data[i], data[i] / sum(data) * 100))
 
     print()
-    # print(' - Estimated Flashcard Reviews -')
-    # print()
-    # print('   {:3d} day : {:.0f} ({:.2f}%)'.format(1, review[0], review[0] / len(raw_data) * 100))
-
-    # for i in (2, 3, 7, 30):
-    #     print('   {:3d} days: {:.0f} ({:.2f}%)'.format(i, review[i - 1], review[i - 1] / len(raw_data) * 100))
-    
-    # print()
 
 
 def extract():
@@ -122,7 +113,7 @@ def standard_dev(raw_data):
     return sqrt(sum([(i - average(raw_data)) ** 2 for i in raw_data])/len(raw_data))
 
 
-def estimated(data, days=7, learn_period=1, learn_each_period=0, result='flashcard'):
+def estimated(data, days=7, learn_pattern=[0], result='flashcard'):
     ''' Function: Calculates estimated flashcards per day '''
     level_weight = 1, 2, 3, 7, 14, 21, 30, 60, 90, 180, 270, 360, None          # Level weight
     data_copy = [i for i in data] + [0] * (13 - len(data))                      # A copy of data
@@ -135,8 +126,8 @@ def estimated(data, days=7, learn_period=1, learn_each_period=0, result='flashca
     for i in range(days):
         reviewed.append([0 for _ in range(12)])
 
-        if i != 0 and i % learn_period == 0:
-            data_copy[0] += learn_each_period
+        if i != 0:
+            data_copy[0] += learn_pattern[(i - 1) % len(learn_pattern)]
             is_added[0] = True
 
         for j in range(0, 12):
@@ -166,15 +157,10 @@ def estimated(data, days=7, learn_period=1, learn_each_period=0, result='flashca
         return vocab_size
 
 
-def render(data, days=7, learn_period=1, learn_each_period=0):
+def render(data, days=7):
     ''' Function: Renders the chart '''
     render_word_by_level(data)
-    render_estimated(data, days=days, title='flashcard',  mode='single',   learn_period=learn_period, learn_each_period=learn_each_period)
-    # render_estimated(data, days=days, title='flashcard',  mode='multiple', learn_period=learn_period, learn_each_period=learn_each_period)
-    # render_estimated(data, days=days, title='flashcard',  mode='stacked',  learn_period=learn_period, learn_each_period=learn_each_period)
-    # render_estimated(data, days=days, title='vocabulary', mode='single',   learn_period=learn_period, learn_each_period=learn_each_period)
-    # render_estimated(data, days=days, title='vocabulary', mode='multiple', learn_period=learn_period, learn_each_period=learn_each_period)
-    # render_estimated(data, days=days, title='vocabulary', mode='stacked',  learn_period=learn_period, learn_each_period=learn_each_period)
+    render_estimated(data, days=days)
     
     # Chart Open
     try:
@@ -205,24 +191,22 @@ def render_word_by_level(data):
     chart.render_to_file('charts/words_by_level.svg')
 
 
-def render_estimated(data, days=30, title='flashcard', mode='single', learn_period=1, learn_each_period=10):
+def render_estimated(data, days=30):
     ''' Function: Renders the estimated chart '''
-    if mode == 'single' or mode == 'multiple':
-        chart = pygal.Line()
-    elif mode == 'stacked':
-        chart = pygal.StackedLine()
-    else:
-        return
+    chart = pygal.Line()
 
     # Chart Data
-    estimated_data = estimated(data, days=days, learn_period=learn_period, learn_each_period=learn_each_period, result=title)
-    if mode == 'single':
-        processed = [sum(i) for i in estimated_data]
-        chart.add('Flashcards per day', processed)
-    elif mode == 'multiple' or mode == 'stacked':
-        processed = [[sum(j[i*3: i*3 + 3]) for j in estimated_data] for i in range(4)]
-        for i in range(4):
-            chart.add('Level {}'.format(i + 1), processed[i])
+    learn_patterns = [
+        ('Never Study', [0]),
+        ('10 Per Day', [10]),
+        ('20 Per Day', [20]),
+    ]
+
+    estimated_list = list()
+
+    for i, j in learn_patterns:
+        estimated_list.append([sum(k) for k in estimated(data, days=days, learn_pattern=j, result='flashcard')])
+        chart.add(i, estimated_list[-1])
 
     # Chart Titles
     chart.title = 'Estimated Flashcards Per Day'
@@ -233,31 +217,17 @@ def render_estimated(data, days=30, title='flashcard', mode='single', learn_peri
     chart.x_labels_major_count = 8
     chart.show_minor_x_labels = False
 
-    if mode == 'single':
-        chart.y_labels = y_labels(
-            min([sum(i) for i in estimated_data]),
-            max([sum(i) for i in estimated_data]),
-            skip=True
-        )
-    elif mode == 'multiple':
-        chart.y_labels = y_labels(
-            min([min(processed[i]) for i in range(4)]),
-            max([max(processed[i]) for i in range(4)]),
-            skip=False
-        )
-    elif mode == 'stacked':
-        chart.y_labels = y_labels(
-            min([sum(estimated_data[i]) for i in range(12)]),
-            max([sum(estimated_data[i]) for i in range(12)]),
-            skip=False
-        )
+    chart.y_labels = y_labels(
+        min([min([j for j in i]) for i in estimated_list]),
+        max([max([j for j in i]) for i in estimated_list]),
+        skip=True
+    )
 
     chart.truncate_label = -1
     
     # Chart Legends
-    if mode == 'single':
-        chart.show_legend = False
-    chart.legend_at_bottom = True
+    chart.show_legend = True
+    chart.legend_at_bottom = False
     chart.legend_at_bottom_columns = 4
     chart.legend_box_size = 16
 
@@ -265,12 +235,9 @@ def render_estimated(data, days=30, title='flashcard', mode='single', learn_peri
     chart.interpolate = 'cubic'
 
     # Chart Render
-    if mode == 'stacked':
-        chart.fill = True
-
     chart.style = DarkStyle
     chart.dots_size = 2
-    chart.render_to_file('charts/estimated_{}_{}.svg'.format(title, mode))
+    chart.render_to_file('charts/estimated.svg')
 
 
 def y_labels(data_min, data_max, max_y_labels=15, skip=False):
