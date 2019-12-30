@@ -31,7 +31,7 @@ import sqlite3
 
 DATABASE_CONTAINER = 'NihongoBackup.nihongodata'
 DATABASE_FILE = 'Flashcards.sqlite'
-VERSION = 'pre1.0.0-c'
+VERSION = 'pre1.0.0-d'
 
 
 def main():
@@ -159,14 +159,20 @@ def estimated(data, days=7, learn_pattern=[0], result='flashcard'):
 
 def render(data, days=7):
     ''' Function: Renders the chart '''
+    # Old Chart Deletion
+    try:
+        os.system('rm charts/*')
+    except (FileNotFoundError, OSError, PermissionError):
+        print('[ERROR] Old chart files deletion error.')
+
     render_word_by_level(data)
     render_estimated(data, days=days)
     
-    # Chart Open
+    # Chart Opening
     try:
         os.system('open charts/*')
     except (FileNotFoundError, OSError, PermissionError):
-        print('[ERROR] Chart file opening error.')
+        print('[ERROR] Chart files opening error.')
 
 
 def render_word_by_level(data):
