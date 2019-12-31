@@ -133,4 +133,5 @@ dmypy.json
 *.sqlite
 *.svg
 *.zip
+DEFAULT_STYLE.txt
 Nihongo Backups
