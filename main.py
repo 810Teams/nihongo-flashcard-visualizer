@@ -9,45 +9,97 @@ from math import ceil
 from math import floor
 from math import sqrt
 
-from src.extract import create_connection
-from src.extract import extract
-from src.extract import get_progress
+from src.data import get_raw_data
+from src.operations import Operation
+from src.operations import Argument
+from src.operations import operate_chart
+from src.operations import operate_extract
+from src.operations import operate_stat
+from src.operations import operate_exit
 from src.render import render
 from src.statistics import average
 from src.statistics import median
 from src.statistics import standard_dev
-from src.util import level_format
+from src.utils import error
+from src.utils import notice
+from src.utils import level_format
 
-VERSION = 'pre1.0.0-e'
+import os
+
+
+APP_NAME = 'Nihongo Flashcard Visualizer'
+AUTHOR = '810Teams'
+VERSION = 'v1.0.0'
+OPERATIONS = [
+    Operation('c', 'chart', 'Create Charts', [
+        Argument('-days INTEGER', 'Duration (Default: All)'),
+        Argument('-max-y INTEGER', 'Maximum y-labels (Default: 15)'),
+        Argument('-style STYLE_NAME', 'Style'),
+        Argument('-open', 'Open'),
+        Argument('-open-only', 'Open Only'),
+    ]),
+    Operation('e', 'extract', 'Extract SQLite file', []),
+    Operation('s', 'stat', 'View Statistics', []),
+    Operation('x', 'exit', 'Exit Application', []),
+]
 
 
 def main():
-    ''' Function: Main function '''
-    extract()
+    ''' Main Function '''
+    run_check()
+    show_app_title()
+    show_operations()
+    start_operating()
 
-    raw_data = sorted(get_progress(create_connection()))
-    data = [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
 
-    render(data, days=120)
+def run_check():
+    ''' Function: Run checking '''
+    if not os.path.exists('NihongoBackup.nihongodata'):
+        print()
+        error('Nihongo backup file not found. Unable to start application.')
+        print()
+        exit()
 
-    print()
-    print('-- Flashcard Statistics --')
-    print()
-    print(' - General Stats -')
-    print()
-    print('   Total: {}'.format(len(raw_data)))
-    print()
-    print('   Median: {}'.format(level_format(median(raw_data), initial_level=1)))
-    print('   Average: {}'.format(level_format(average(raw_data), initial_level=1)))
-    print('   Standard Deviation: {}'.format(level_format(standard_dev(raw_data), initial_level=0)))
-    print()
-    print(' - Level Stats -')
-    print()
 
-    for i in range(len(data) - 1, -1, -1):
-        print('   Level {}-{}: {} ({:.2f}%)'.format(i // 3 + 1, i % 3, data[i], data[i] / sum(data) * 100))
-
+def show_app_title():
+    ''' Function: Show application title '''
     print()
+    print('- {} -'.format(APP_NAME))
+    print(('by {} ({})'.format(AUTHOR, VERSION)).center(len(APP_NAME) + 4))
+
+
+def show_operations():
+    ''' Function: Show operation list '''
+    print()
+    print('- Operation List -')
+
+    for i in OPERATIONS:
+        print('[{}]'.format(i.command))
+        for j in i.args:
+            print('    {}{}: {}'.format(j.name, ' ' * (max([len(k.name) for k in i.args]) - len(j.name) + 1), j.description))
+
+
+def start_operating():
+    ''' Function: Start operating application '''
+    while True:
+        print()
+        try:
+            action = [i for i in input('(Command) ').split()]
+            print()
+            operate(action[0].lower(), action[1:])
+        except IndexError:
+            error('Invalid action format. Please try again.')
+
+
+def operate(action, args):
+    ''' Function: Operate a specific action '''
+    try:
+        eval('operate_{}(get_raw_data(), args)'.format(action.lower()))
+    except (NameError, SyntaxError):
+        try:
+            eval('operate_{}(get_raw_data(), args)'.format([i.command for i in OPERATIONS if i.code == action.lower()][0]))
+        except (IndexError, NameError, SyntaxError): 
+            error('Invalid action. Please try again.')
 
 
 main()
