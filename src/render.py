@@ -66,21 +66,21 @@ def render_estimated(data, days=30, max_y_labels=15, style=DefaultStyle):
     learn_patterns = [
         ('Never Study', [0]),
         ('10 Per Day', [10]),
-        ('20 Per Day', [20]),
+        ('20 Per Day', [20])
     ]
 
     estimated_list = list()
 
     for i, j in learn_patterns:
         estimated_list.append([sum(k) for k in estimated(data, days=days, learn_pattern=j, result='flashcard')])
-        chart.add(i, estimated_list[-1])
+        chart.add(i, [None] + estimated_list[-1], allow_interruptions=True, stroke=True)
 
     # Chart Titles
     chart.title = 'Estimated Flashcards Per Day'
     chart.x_title = 'Days'
 
     # Chart Labels
-    chart.x_labels = [i for i in range(1, days + 1)]
+    chart.x_labels = [i for i in range(0, days + 1)]
     chart.x_labels_major_count = 8
     chart.show_minor_x_labels = False
 
