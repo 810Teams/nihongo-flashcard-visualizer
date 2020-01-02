@@ -19,6 +19,7 @@ from time import perf_counter
 
 from src.statistics import estimated
 from src.utils import notice
+from src.utils import level_format
 
 import os
 import pygal
@@ -29,6 +30,7 @@ def render(data, days=30, max_y_labels=15, style='DefaultStyle'):
 
     render_word_by_level(data, max_y_labels=max_y_labels, style=eval(style))
     render_estimated(data, days=days, max_y_labels=max_y_labels, style=eval(style))
+    render_progress(data, max_y_labels=max_y_labels, style=eval(style))
 
     notice('Total time spent rendering charts is {:.2f} seconds.'.format(perf_counter() - time_start))
 
@@ -109,6 +111,42 @@ def render_estimated(data, days=30, max_y_labels=15, style=DefaultStyle):
 
     # Notice
     notice('Chart \'estimated\' successfully exported.')
+
+
+def render_progress(data, max_y_labels=15, style=DefaultStyle):
+    ''' Function: Renders the estimated chart '''
+    chart = pygal.Histogram()
+
+    # Chart Data
+    data += [0] * (13 - len(data))
+    # chart.add('', [(round(i/3 + 1, 2), sum(data[:i + 1]) - data[i], sum(data[:i + 1])) for i in range(len(data))])
+    for i in range(0, 13, 3):
+        chart.add(
+            'Level {:.0f}'.format(i//3 + 1),
+            [(round((i + j)/3 + 1, 2), sum(data[:i + j + 1]) - data[i + j], sum(data[:i + j + 1])) for j in range(len(data[i:i + 3]))]
+        )
+
+    # Chart Titles
+    chart.title = 'Progress'
+    chart.x_title = 'Days'
+
+    # Chart Labels
+    chart.x_labels = range(1, sum(data) + 1)
+    chart.x_labels_major_count = 8
+    chart.show_minor_x_labels = False
+    chart.y_labels = [0, 1, 2, 3, 4, 5]
+    chart.truncate_label = -1
+
+    # Chart Legends
+    chart.show_legend = True
+    
+    # Chart Render
+    chart.style = style
+    chart.dots_size = 2
+    chart.render_to_file('charts/progress.svg')
+
+    # Notice
+    notice('Chart \'progress\' successfully exported.')
 
 
 def y_labels(data_min, data_max, max_y_labels=15, skip=False):
