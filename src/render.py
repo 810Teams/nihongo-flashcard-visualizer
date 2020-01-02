@@ -24,12 +24,12 @@ from src.utils import level_format
 import os
 import pygal
 
-def render(data, days=30, max_y_labels=15, style='DefaultStyle'):
+def render(data, days=30, incorrect_p=0.0, max_y_labels=15, style='DefaultStyle'):
     ''' Function: Renders the chart '''
     time_start = perf_counter()
 
     render_word_by_level(data, max_y_labels=max_y_labels, style=eval(style))
-    render_estimated(data, days=days, max_y_labels=max_y_labels, style=eval(style))
+    render_estimated(data, days=days, incorrect_p=incorrect_p, max_y_labels=max_y_labels, style=eval(style))
     render_progress(data, max_y_labels=max_y_labels, style=eval(style))
 
     notice('Total time spent rendering charts is {:.2f} seconds.'.format(perf_counter() - time_start))
@@ -60,7 +60,7 @@ def render_word_by_level(data, max_y_labels=15, style=DefaultStyle):
     notice('Chart \'words_by_level\' successfully exported.')
 
 
-def render_estimated(data, days=30, max_y_labels=15, style=DefaultStyle):
+def render_estimated(data, days=30, incorrect_p=0.0, max_y_labels=15, style=DefaultStyle):
     ''' Function: Renders the estimated chart '''
     chart = pygal.Line()
 
@@ -74,7 +74,7 @@ def render_estimated(data, days=30, max_y_labels=15, style=DefaultStyle):
     estimated_list = list()
 
     for i, j in learn_patterns:
-        estimated_list.append([sum(k) for k in estimated(data, days=days, learn_pattern=j, result='flashcard')])
+        estimated_list.append([sum(k) for k in estimated(data, days=days, incorrect_p=incorrect_p, learn_pattern=j, result='flashcard')])
         chart.add(i, [None] + estimated_list[-1], allow_interruptions=True, stroke=True)
 
     # Chart Titles
@@ -119,7 +119,6 @@ def render_progress(data, max_y_labels=15, style=DefaultStyle):
 
     # Chart Data
     data += [0] * (13 - len(data))
-    # chart.add('', [(round(i/3 + 1, 2), sum(data[:i + 1]) - data[i], sum(data[:i + 1])) for i in range(len(data))])
     for i in range(0, 13, 3):
         chart.add(
             'Level {:.0f}'.format(i//3 + 1),
