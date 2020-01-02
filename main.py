@@ -29,12 +29,12 @@ import os
 
 APP_NAME = 'Nihongo Flashcard Visualizer'
 AUTHOR = '810Teams'
-VERSION = 'v1.1.2'
+VERSION = 'v1.1.3'
 OPERATIONS = [
     Operation('c', 'chart', 'Create Charts', [
-        Argument('-days INTEGER', 'Duration (Default: All)'),
+        Argument('-days INTEGER', 'Duration (Default: 30)'),
         Argument('-max-y INTEGER', 'Maximum y-labels (Default: 15)'),
-        Argument('-incorrect-p NUMBER', 'Incorrect probability'),
+        Argument('-incorrect-p NUMBER', 'Incorrect probability (Default: 0.0)'),
         Argument('-style STYLE_NAME', 'Style'),
         Argument('-open', 'Open'),
         Argument('-open-only', 'Open Only'),
