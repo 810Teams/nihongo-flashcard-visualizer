@@ -1,3 +1,7 @@
+'''
+    `loaders.py`
+'''
+
 def load_default_style():
     ''' Function: Load default style '''
     try:

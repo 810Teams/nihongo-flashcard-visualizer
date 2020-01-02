@@ -1,3 +1,7 @@
+'''
+    `statistics.py`
+'''
+
 from math import ceil
 from math import sqrt
 

@@ -1,3 +1,7 @@
+'''
+    `rensder.py`
+'''
+
 from math import ceil
 from math import floor
 from pygal.style import DefaultStyle
@@ -22,6 +26,7 @@ from src.utils import notice
 
 import os
 import pygal
+
 
 def render(data, days=30, incorrect_p=0.0, max_y_labels=15, style='DefaultStyle'):
     ''' Function: Renders the chart '''
@@ -60,7 +65,7 @@ def render_word_by_level(data, max_y_labels=15, style=DefaultStyle):
 
 
 def render_estimated(data, days=30, incorrect_p=0.0, max_y_labels=15, style=DefaultStyle):
-    ''' Function: Renders the estimated chart '''
+    ''' Function: Renders the estimated flashcards per day chart '''
     chart = pygal.Line()
 
     # Chart Data
@@ -113,7 +118,7 @@ def render_estimated(data, days=30, incorrect_p=0.0, max_y_labels=15, style=Defa
 
 
 def render_progress(data, max_y_labels=15, style=DefaultStyle):
-    ''' Function: Renders the estimated chart '''
+    ''' Function: Renders the progress chart '''
     chart = pygal.Histogram()
 
     # Chart Data
