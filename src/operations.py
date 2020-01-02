@@ -14,8 +14,6 @@ from src.utils import notice
 from src.utils import level_format
 
 import os
-import numpy
-import pandas
 
 STYLES = (
     'DefaultStyle',
