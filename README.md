@@ -15,8 +15,11 @@ Download for iOS on [AppStore](https://apps.apple.com/us/app/nihongo-japanese-di
 ### Learned Words by Level
 ![](readme/img/03.png)
 
-### Estimated Flashcards Per Day
+### Word Progress
 ![](readme/img/04.png)
+
+### Estimated Flashcards Per Day
+![](readme/img/05.png)
 
 [![forthebadge](https://forthebadge.com/images/badges/built-by-developers.svg)](https://forthebadge.com)
 [![forthebadge](https://forthebadge.com/images/badges/built-with-love.svg)](https://forthebadge.com)
