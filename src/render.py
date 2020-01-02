@@ -19,7 +19,6 @@ from time import perf_counter
 
 from src.statistics import estimated
 from src.utils import notice
-from src.utils import level_format
 
 import os
 import pygal
