@@ -64,6 +64,41 @@ def render_word_by_level(data, max_y_labels=15, style=DefaultStyle):
     notice('Chart \'words_by_level\' successfully exported.')
 
 
+def render_progress(data, max_y_labels=15, style=DefaultStyle):
+    ''' Function: Renders the progress chart '''
+    chart = pygal.Histogram()
+
+    # Chart Data
+    data += [0] * (13 - len(data))
+    for i in range(0, 13, 3):
+        chart.add(
+            'Level {:.0f}'.format(i//3 + 1),
+            [(round((i + j)/3 + 1, 2), sum(data[:i + j + 1]) - data[i + j], sum(data[:i + j + 1])) for j in range(len(data[i:i + 3]))]
+        )
+
+    # Chart Titles
+    chart.title = 'Word Progress'
+    chart.x_title = 'Words'
+
+    # Chart Labels
+    chart.x_labels = range(1, sum(data) + 1)
+    chart.x_labels_major_count = 8
+    chart.show_minor_x_labels = False
+    chart.y_labels = [0, 1, 2, 3, 4, 5]
+    chart.truncate_label = -1
+
+    # Chart Legends
+    chart.show_legend = True
+    
+    # Chart Render
+    chart.style = style
+    chart.dots_size = 2
+    chart.render_to_file('charts/progress.svg')
+
+    # Notice
+    notice('Chart \'progress\' successfully exported.')
+
+
 def render_estimated(data, days=30, incorrect_p=0.0, max_y_labels=15, style=DefaultStyle):
     ''' Function: Renders the estimated flashcards per day chart '''
     chart = pygal.Line()
@@ -115,41 +150,6 @@ def render_estimated(data, days=30, incorrect_p=0.0, max_y_labels=15, style=Defa
 
     # Notice
     notice('Chart \'estimated\' successfully exported.')
-
-
-def render_progress(data, max_y_labels=15, style=DefaultStyle):
-    ''' Function: Renders the progress chart '''
-    chart = pygal.Histogram()
-
-    # Chart Data
-    data += [0] * (13 - len(data))
-    for i in range(0, 13, 3):
-        chart.add(
-            'Level {:.0f}'.format(i//3 + 1),
-            [(round((i + j)/3 + 1, 2), sum(data[:i + j + 1]) - data[i + j], sum(data[:i + j + 1])) for j in range(len(data[i:i + 3]))]
-        )
-
-    # Chart Titles
-    chart.title = 'Progress'
-    chart.x_title = 'Days'
-
-    # Chart Labels
-    chart.x_labels = range(1, sum(data) + 1)
-    chart.x_labels_major_count = 8
-    chart.show_minor_x_labels = False
-    chart.y_labels = [0, 1, 2, 3, 4, 5]
-    chart.truncate_label = -1
-
-    # Chart Legends
-    chart.show_legend = True
-    
-    # Chart Render
-    chart.style = style
-    chart.dots_size = 2
-    chart.render_to_file('charts/progress.svg')
-
-    # Notice
-    notice('Chart \'progress\' successfully exported.')
 
 
 def y_labels(data_min, data_max, max_y_labels=15, skip=False):
