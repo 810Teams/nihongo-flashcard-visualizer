@@ -1,3 +1,7 @@
+'''
+    `data.py`
+'''
+
 from src.utils import error
 from src.utils import notice
 
@@ -7,6 +11,7 @@ import sqlite3
 
 DATABASE_CONTAINER = 'NihongoBackup.nihongodata'
 DATABASE_FILE = 'Flashcards.sqlite'
+
 
 def extract():
     ''' Function: Extracts database file from the zip '''
