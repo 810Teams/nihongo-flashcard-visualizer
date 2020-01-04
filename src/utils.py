@@ -23,6 +23,6 @@ def notice(message, show=True, end='\n'):
         print('[NOTICE]', message, end=end)
 
 
-def level_format(level_value, initial_level=1):
+def level_format(level_value, initial_level=1, remainder=False):
     ''' Function: Get a level format from a level value '''
-    return '{:.0f}-{:.0f} (+{:.2f})'.format(level_value // 3 + initial_level, floor(level_value % 3), level_value % 1)
+    return '{:.0f}-{:.0f}'.format(level_value // 3 + initial_level, floor(level_value % 3)) + ' (+{:.2f})'.format(level_value % 1) * remainder

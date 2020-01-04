@@ -57,4 +57,4 @@ def get_raw_data():
 def get_processed_data():
     ''' Function: Get processed data '''
     raw_data = get_raw_data()
-    return [raw_data.count(i) for i in range(0, max(raw_data) + 1)]
+    return [raw_data.count(i) for i in range(0, 13)]
