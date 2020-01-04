@@ -2,7 +2,7 @@
     Nihongo - Japanese Dictionary Application
     Flashcard Progress Visualizer
 
-    by Teerapat Kraisrisirikul
+    GitHub: https://github.com/810Teams/nihongo-flashcard-visualizer
 '''
 
 from math import ceil
@@ -29,7 +29,7 @@ import os
 
 APP_NAME = 'Nihongo Flashcard Visualizer'
 AUTHOR = '810Teams'
-VERSION = 'v1.2.0'
+VERSION = 'v1.2.1'
 OPERATIONS = [
     Operation('c', 'chart', 'Create Charts', [
         Argument('-days INTEGER', 'Duration (Default: 30)'),
@@ -40,7 +40,7 @@ OPERATIONS = [
         Argument('-open', 'Open'),
         Argument('-open-only', 'Open Only'),
     ]),
-    Operation('e', 'extract', 'Extract SQLite file', []),
+    Operation('e', 'extract', 'Extract and update the SQLite file', []),
     Operation('s', 'stat', 'View Statistics', []),
     Operation('x', 'exit', 'Exit Application', []),
 ]

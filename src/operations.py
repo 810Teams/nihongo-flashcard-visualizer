@@ -57,7 +57,7 @@ class Argument:
 
 def operate_chart(raw_data, args):
     ''' Function: Operation Code 'C' (Create Charts) '''
-    # Step 0: -open-only argument
+    # Step 1: -open-only argument
     if '-open-only' in args:
         try:
             os.system('open charts/*')
@@ -98,9 +98,9 @@ def operate_chart(raw_data, args):
     else:
         dot_shrink = True
     
-    # Step 3: -incorrect-p argument
+    # Step 4: -incorrect-p argument
     if '-inc-p' in args:
-        # Step 3.1 - Test for valid format
+        # Step 4.1 - Test for valid format
         try:
             incorrect_p = float(args[args.index('-inc-p') + 1])
             if (incorrect_p < 0) or (1 < incorrect_p):
@@ -114,9 +114,9 @@ def operate_chart(raw_data, args):
     else:
         incorrect_p = 0.0
     
-    # Step 4: -max-y argument
+    # Step 5: -max-y argument
     if '-max-y' in args:
-        # Step 4.1 - Test for valid format
+        # Step 5.1 - Test for valid format
         try:
             max_y_labels = int(args[args.index('-max-y') + 1])
         except (IndexError, ValueError):
@@ -124,7 +124,7 @@ def operate_chart(raw_data, args):
             error('Aborting chart creation process.')
             return
         
-        # Step 4.2 - Test for valid requirements
+        # Step 5.2 - Test for valid requirements
         if not (max_y_labels >= 2):
             error('Maximum y labels must be an integer at least 2.')
             error('Aborting chart creation process.')
@@ -132,9 +132,9 @@ def operate_chart(raw_data, args):
     else:
         max_y_labels = 15
 
-    # Step 5: -style argument
+    # Step 6: -style argument
     if '-style' in args:
-        # Step 5.1.1 - Test for valid format
+        # Step 6.1.1 - Test for valid format
         try:
             style = args[args.index('-style') + 1]
         except (IndexError, ValueError):
@@ -142,7 +142,7 @@ def operate_chart(raw_data, args):
             error('Aborting chart creation process.')
             return
 
-        # Step 5.1.2 - Test for valid requirements
+        # Step 6.1.2 - Test for valid requirements
         if style not in STYLES:
             error('Invalid style.')
             error('Aborting chart creation process.')
@@ -150,7 +150,7 @@ def operate_chart(raw_data, args):
     elif load_default_style():
         style = load_default_style().strip()
 
-        # Step 5.2.1 - Test for valid requirements
+        # Step 6.2.1 - Test for valid requirements
         if style not in STYLES:
             error('Invalid style found in \'DEFAULT_STYLE.txt\'.')
             error('Aborting chart creation process.')
@@ -161,9 +161,10 @@ def operate_chart(raw_data, args):
     else:
         style = 'DefaultStyle'
     
+    # Step 7: Rendering
     render(get_processed_data(), days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, style=style)
     
-    # Step 6: -open argument
+    # Step 8: -open argument
     if '-open' in args:
         try:
             os.system('open charts/*')
