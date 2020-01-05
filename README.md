@@ -1,15 +1,15 @@
 # Nihongo Flashcard Visualizer
 Nihongo Japanese Dictionary Application Flashcard Progress Visualizer, or as Nihongo Flashcard Visualizer, the name of the repository.
 
-This repository contains code of the command line application in rendering and visualizing charts of Nihongo flashcard progress.
+This repository contains code of the command line application in rendering and visualizing charts of your Nihongo flashcard progress.
 
 ## Nihongo Application
 Nihongo is a Japanese dictionary and flashcard application available on iOS devices.
 
-Download for iOS on [AppStore](https://apps.apple.com/us/app/nihongo-japanese-dictionary/id881697245) (Requires iOS 12.4 or later)
+Download on [AppStore](https://apps.apple.com/us/app/nihongo-japanese-dictionary/id881697245) (Requires iOS 12.4 or newer)
 
 ## System Requirements
-Nihongo Flashcard Visualizer requires Python 3.6 or later, with Pygal library installed.
+Nihongo Flashcard Visualizer requires Python 3.6 or newer, with pygal library installed.
 
 This application is not guaranteed to be able to run on Windows, works fine on MacOS Catalina (10.15).
 
@@ -20,12 +20,12 @@ Download from [python.org](https://www.python.org/downloads/).
 
 Download from [anaconda.com](https://www.anaconda.com/distribution/#download-section).
 
-### Install Pygal
+### Install pygal
 ```shell
 pip install pygal
 ```
 
-## Manual
+## User Manual
 ### Setting Up
 Run `setup.sh` first. After setting up, run `run.sh` or use Python to run `main.py` to run the application.
 
@@ -44,6 +44,31 @@ However, overwriting the Nihongo backup file does not update the `Flashcards.sql
 If a chart rendering process is attempted without the `Flashcards.sqlite` file presented, it will be extracted automatically.
 
 ![](readme/img/extraction.jpg)
+
+### Chart Styles
+Without coding or code modification, charts can be rendered with an option out of 15 chart styles.
+
+The followings are all available chart styles, all are based on pygal built-in styles. If no specific chart style is configured, DefaultStyle will be used.
+
+```
+DefaultStyle
+DarkStyle
+NeonStyle
+DarkSolarizedStyle
+LightSolarizedStyle
+LightStyle
+CleanStyle
+RedBlueStyle
+DarkColorizedStyle
+LightColorizedStyle
+TurquoiseStyle
+LightGreenStyle
+DarkGreenStyle
+DarkGreenBlueStyle
+BlueStyle
+```
+
+References: [pygal.org/en/stable/documentation/builtin_styles.html](http://www.pygal.org/en/stable/documentation/builtin_styles.html)
 
 ## Screenshots
 ### Command Line Application
