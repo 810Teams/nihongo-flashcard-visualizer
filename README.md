@@ -71,6 +71,8 @@ BlueStyle
 References: [pygal.org/en/stable/documentation/builtin_styles.html](http://www.pygal.org/en/stable/documentation/builtin_styles.html)
 
 ## Screenshots
+The actual product may differ from screenshots due to not being up-to-date.
+
 ### Command Line Application
 ![](readme/img/01.png)
 
