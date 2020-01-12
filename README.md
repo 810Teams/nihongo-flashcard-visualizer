@@ -14,13 +14,15 @@ Nihongo Flashcard Visualizer requires Python 3.6 or newer, with pygal library in
 This application is not guaranteed to be able to run on Windows, works fine on MacOS Catalina (10.15).
 
 ### Install Python
-Python can be installed from various sources. The following two are the most recommended (Choose one).
-
-Download from [python.org](https://www.python.org/downloads/).
-
-Download from [anaconda.com](https://www.anaconda.com/distribution/#download-section).
+Python can be installed from various sources, recommended methods are [python.org](https://www.python.org/downloads/) and [anaconda.com](https://www.anaconda.com/distribution/#download-section).
 
 ### Install pygal
+Install with `requirements.txt`
+```shell
+pip install -r requirements.txt
+```
+
+Install the library directly
 ```shell
 pip install pygal
 ```
