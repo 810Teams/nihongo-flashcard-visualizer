@@ -25,8 +25,8 @@ def standard_dev(raw_data):
     return sqrt(sum([(i - average(raw_data)) ** 2 for i in raw_data])/len(raw_data))
 
 
-def progress_ratio(raw_data):
-    ''' Function: Calculates progress ratio on current learned words '''
+def progress_coverage(raw_data):
+    ''' Function: Calculates progress coverage on current learned words '''
     raw_data_copy = [i + 3 for i in raw_data]
     return sum(raw_data_copy)/(15 * len(raw_data_copy))
 
