@@ -35,9 +35,9 @@ def create_connection():
 def get_progress(conn):
     ''' Function: Gets flashcard progress from database '''
     cur = conn.cursor()
-    cur.execute('SELECT ZPROGRESS, Z8_BECAMEACTIVEVIAFLASHCARDPACK FROM ZFLASHCARD')
+    cur.execute('SELECT ZPROGRESS, ZBECAMEACTIVEDATE, ZKANJITEXT FROM ZFLASHCARD')
 
-    return [i[0] for i in cur.fetchall() if i[1] != None]
+    return [i[0] for i in cur.fetchall() if i[1] != None and i[2] == None]
 
 
 def get_raw_data():

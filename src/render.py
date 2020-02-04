@@ -19,12 +19,15 @@ from pygal.style import LightGreenStyle
 from pygal.style import DarkGreenStyle
 from pygal.style import DarkGreenBlueStyle
 from pygal.style import BlueStyle
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 from time import perf_counter
 
 from src.statistics import estimated
 from src.utils import notice
 from src.utils import level_format
 
+import numpy
 import os
 import pygal
 
@@ -36,6 +39,7 @@ def render(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, sim
     data_copy = [i for i in data]   
 
     render_word_by_level(data_copy, days=days, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
+    render_distribution(data_copy, days=days, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
     render_estimated(data_copy, days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
     render_progress(data_copy, days=days, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
 
@@ -69,6 +73,49 @@ def render_word_by_level(data, days=60, max_y_labels=15, simulate=False, style=D
 
     # Notice
     notice('Chart \'words_by_level\' successfully exported.')
+
+
+def render_distribution(data, days=60, max_y_labels=15, simulate=False, style=DefaultStyle):
+    ''' Function: Renders the word by level chart '''
+    chart = pygal.Line()
+
+    # Chart Data
+    data_copy = [i for i in data]
+    if simulate:
+        data_copy = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
+        
+    chart.add('Learned Words', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_copy) + (sum(data_copy) == 0)) * 100)} for i in data_copy], stroke=False)
+
+    # Distribution Calculation
+    data_x = numpy.array([[i] for i in range(13)])
+    data_y = numpy.array([[i] for i in data_copy])
+
+    poly_feature = PolynomialFeatures(degree = 3)
+    data_x = poly_feature.fit_transform(data_x)
+    regressor = LinearRegression()
+    regressor.fit(data_x, data_y)
+
+    chart.add('Distribution', [max(i[0], 0) for i in regressor.predict(data_x).tolist()], fill=True, show_dots=False)
+
+    # Chart Titles
+    chart.title = 'Distribution'
+
+    # Chart Labels
+    chart.x_labels = ['{}-{}'.format(i // 3 + 1, i % 3) for i in range(len(data_copy))]
+    chart.y_labels = y_labels(min(data_copy), max(data_copy), max_y_labels=max_y_labels)
+    
+    # Chart Legends
+    chart.show_legend = False
+
+    # Chart Interpolation
+    chart.interpolate = 'cubic'
+
+    # Chart Render
+    chart.style = style
+    chart.render_to_file('charts/distribution.svg')
+
+    # Notice
+    notice('Chart \'distribution\' successfully exported.')
 
 
 def render_progress(data, days=60, max_y_labels=15, simulate=False, style=DefaultStyle):
