@@ -29,14 +29,15 @@ import os
 
 APP_NAME = 'Nihongo Flashcard Visualizer'
 AUTHOR = '810Teams'
-VERSION = 'v1.2.1'
+VERSION = 'v1.3.0'
 OPERATIONS = [
     Operation('c', 'chart', 'Create Charts', [
         Argument('-days INTEGER', 'Duration (Default: 30)'),
-        Argument('-dot-shrink BOOLEAN', 'Dots shrinking (Default: True)'),
         Argument('-max-y INTEGER', 'Maximum y-labels (Default: 15)'),
         Argument('-inc-p NUMBER', 'Incorrect probability (Default: 0.0)'),
         Argument('-style STYLE_NAME', 'Style'),
+        Argument('-no-dot-shrink', 'Disable dots shrinking'),
+        Argument('-simulate', 'Simulation mode'),
         Argument('-open', 'Open'),
         Argument('-open-only', 'Open Only'),
     ]),

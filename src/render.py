@@ -29,30 +29,36 @@ import os
 import pygal
 
 
-def render(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, style='DefaultStyle'):
+def render(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, simulate=False, style='DefaultStyle'):
     ''' Function: Renders the chart '''
     time_start = perf_counter()
 
-    render_word_by_level(data, max_y_labels=max_y_labels, style=eval(style))
-    render_estimated(data, days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, style=eval(style))
-    render_progress(data, max_y_labels=max_y_labels, style=eval(style))
+    data_copy = [i for i in data]   
+
+    render_word_by_level(data_copy, days=days, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
+    render_estimated(data_copy, days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
+    render_progress(data_copy, days=days, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
 
     notice('Total time spent rendering charts is {:.2f} seconds.'.format(perf_counter() - time_start))
 
 
-def render_word_by_level(data, max_y_labels=15, style=DefaultStyle):
+def render_word_by_level(data, days=60, max_y_labels=15, simulate=False, style=DefaultStyle):
     ''' Function: Renders the word by level chart '''
     chart = pygal.HorizontalBar()
 
     # Chart Data
-    chart.add('Learned Words', [{'value': i, 'label': '{:.2f}%'.format(i / sum(data) * 100)} for i in data], rounded_bars=0)
+    data_copy = [i for i in data]
+    if simulate:
+        data_copy = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
+        
+    chart.add('Learned Words', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_copy) + (sum(data_copy) == 0)) * 100)} for i in data_copy], rounded_bars=0)
 
     # Chart Titles
     chart.title = 'Learned Words by Level'
 
     # Chart Labels
-    chart.x_labels = ['{}-{}'.format(i // 3 + 1, i % 3) for i in range(len(data))]
-    chart.y_labels = y_labels(min(data), max(data), max_y_labels=max_y_labels)
+    chart.x_labels = ['{}-{}'.format(i // 3 + 1, i % 3) for i in range(len(data_copy))]
+    chart.y_labels = y_labels(min(data_copy), max(data_copy), max_y_labels=max_y_labels)
     
     # Chart Legends
     chart.show_legend = False
@@ -65,18 +71,22 @@ def render_word_by_level(data, max_y_labels=15, style=DefaultStyle):
     notice('Chart \'words_by_level\' successfully exported.')
 
 
-def render_progress(data, max_y_labels=15, style=DefaultStyle):
+def render_progress(data, days=60, max_y_labels=15, simulate=False, style=DefaultStyle):
     ''' Function: Renders the progress chart '''
     chart = pygal.Histogram()
 
     # Chart Data
+    data_copy = [i for i in data]
+    if simulate:
+        data_copy = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
+
     for i in range(0, 13, 3):
         chart.add(
             'Level {:.0f}'.format(i//3 + 1),
             [{
-                'value': (round((i + j) / 3 + 1, 2), sum(data[:i + j + 1]) - data[i + j], sum(data[:i + j + 1])),
-                'label': '{:.2f}%'.format(data[i + j] / sum(data) * 100)
-            } for j in range(len(data[i:i + 3]))],
+                'value': (round((i + j) / 3 + 1, 2), sum(data_copy[:i + j + 1]) - data_copy[i + j], sum(data_copy[:i + j + 1])),
+                'label': '{:.2f}%'.format(data_copy[i + j] / (sum(data_copy) + (sum(data_copy) == 0)) * 100)
+            } for j in range(len(data_copy[i:i + 3]))],
             formatter=lambda x: '{}'.format(x[2] - x[1])
         )
 
@@ -85,7 +95,7 @@ def render_progress(data, max_y_labels=15, style=DefaultStyle):
     chart.x_title = 'Words'
 
     # Chart Labels
-    chart.x_labels = range(1, sum(data) + 1)
+    chart.x_labels = range(1, sum(data_copy) + 1)
     chart.x_labels_major_count = 8
     chart.show_minor_x_labels = False
     chart.y_labels = [0, 1, 2, 3, 4, 5]
@@ -103,11 +113,15 @@ def render_progress(data, max_y_labels=15, style=DefaultStyle):
     notice('Chart \'progress\' successfully exported.')
 
 
-def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, style=DefaultStyle):
+def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, simulate=False, style=DefaultStyle):
     ''' Function: Renders the estimated flashcards per day chart '''
     chart = pygal.Line()
 
     # Chart Data
+    data_copy = [i for i in data]
+    if simulate:
+        data_copy = [0 for _ in range(13)]
+
     learn_patterns = [
         ('Never Study', [0]),
         ('10 Per Day', [10]),
@@ -117,7 +131,7 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
     estimated_list = list()
 
     for i, j in learn_patterns:
-        estimated_list.append([sum(k) for k in estimated(data, days=days, incorrect_p=incorrect_p, learn_pattern=j, result='flashcard')])
+        estimated_list.append([sum(k) for k in estimated(data_copy, days=days, incorrect_p=incorrect_p, learn_pattern=j, result='flashcard')])
         chart.add(i, [None] + estimated_list[-1], allow_interruptions=True, stroke=True)
 
     # Chart Titles
@@ -143,9 +157,6 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
     chart.legend_at_bottom = False
     chart.legend_at_bottom_columns = 4
     chart.legend_box_size = 16
-
-    # Chart Interpolation
-    chart.interpolate = 'cubic'
 
     # Chart Render
     chart.style = style
