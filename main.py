@@ -29,7 +29,7 @@ import os
 
 APP_NAME = 'Nihongo Flashcard Visualizer'
 AUTHOR = '810Teams'
-VERSION = 'pre1.3.0-b'
+VERSION = 'pre1.3.0-c'
 OPERATIONS = [
     Operation('c', 'chart', 'Create Charts', [
         Argument('-days INTEGER', 'Duration (Default: 30)'),
@@ -37,7 +37,7 @@ OPERATIONS = [
         Argument('-inc-p NUMBER', 'Incorrect probability (Default: 0.0)'),
         Argument('-style STYLE_NAME', 'Style'),
         Argument('-no-dot-shrink', 'Disable dots shrinking'),
-        Argument('-simulate [BETA]', 'Simulation mode'),
+        Argument('-simulate', 'Simulation mode'),
         Argument('-open', 'Open'),
         Argument('-open-only', 'Open Only'),
     ]),
