@@ -10,26 +10,25 @@ class FlashcardData:
 
     def __init__(self, progress=0, days=None, auto_replace_error=[]):
         if 0 <= progress <= 12:
-            self.progress = progress
+            self.progress = int(progress)
         elif 'progress' in auto_replace_error:
-            self.progress = min(max(progress, 0), 12)
+            self.progress = min(max(int(progress), 0), 12)
         else:
             raise FlashcardError
 
         if days == None:
             self.days = FlashcardData.progress_days[progress]
         elif 'days' in auto_replace_error:
-            if days <= 0:
-                self.days = 0
+            if days <= 1:
+                self.days = 1
             elif progress == 12:
                 self.days = None
             else:
                 self.days = int(days)
         else:
-            if days <= 0 or progress == 12:
+            if days <= 1 or progress == 12:
                 raise FlashcardError
-            else:
-                self.days = int(days)
+            self.days = int(days)
 
     def count(self):
         if self.progress == 12:
