@@ -146,7 +146,16 @@ def operate_chart(raw_data, args):
         style = 'DefaultStyle'
     
     # Step 6: Rendering
-    render(get_processed_data(), days=days, dot_shrink=('-no-dot-shrink' not in args), incorrect_p=incorrect_p, max_y_labels=max_y_labels, simulate=('-simulate' in args), style=style)
+    render(
+        get_processed_data(),
+        days=days,
+        dot_shrink=('-no-dot-shrink' not in args),
+        incorrect_p=incorrect_p,
+        max_y_labels=max_y_labels,
+        show_correlation=('-show-correl' in args),
+        simulation_mode=('-simulate' in args),
+        style=style
+    )
     
     # Step 7: -open argument
     if '-open' in args:

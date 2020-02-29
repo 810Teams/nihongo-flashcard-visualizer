@@ -2,6 +2,7 @@
     `rensder.py`
 '''
 
+# from console_progressbar import ProgressBar
 from math import ceil
 from math import floor
 from pygal.style import DefaultStyle
@@ -19,36 +20,39 @@ from pygal.style import LightGreenStyle
 from pygal.style import DarkGreenStyle
 from pygal.style import DarkGreenBlueStyle
 from pygal.style import BlueStyle
+from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import PolynomialFeatures
 from time import perf_counter
 
 from src.statistics import estimated
 from src.utils import notice
 from src.utils import level_format
 
+import numpy
 import os
 import pygal
 
 
-def render(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, simulate=False, style='DefaultStyle'):
+def render(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, show_correlation=False, simulation_mode=False, style='DefaultStyle'):
     ''' Function: Renders the chart '''
     time_start = perf_counter()
 
     data_copy = [i for i in data]   
 
-    render_word_by_level(data_copy, days=days, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
-    render_estimated(data_copy, days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
-    render_progress(data_copy, days=days, max_y_labels=max_y_labels, simulate=simulate, style=eval(style))
+    render_word_by_level(data_copy, days=days, max_y_labels=max_y_labels, simulation_mode=simulation_mode, style=eval(style))
+    render_estimated(data_copy, days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, show_correlation=show_correlation, simulation_mode=simulation_mode, style=eval(style))
+    render_progress(data_copy, days=days, max_y_labels=max_y_labels, simulation_mode=simulation_mode, style=eval(style))
 
     notice('Total time spent rendering charts is {:.2f} seconds.'.format(perf_counter() - time_start))
 
 
-def render_word_by_level(data, days=60, max_y_labels=15, simulate=False, style=DefaultStyle):
+def render_word_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style=DefaultStyle):
     ''' Function: Renders the word by level chart '''
     chart = pygal.HorizontalBar()
 
     # Chart Data
     data_copy = [i for i in data]
-    if simulate:
+    if simulation_mode:
         data_copy = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
         
     chart.add('Learned Words', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_copy) + (sum(data_copy) == 0)) * 100)} for i in data_copy], rounded_bars=0)
@@ -71,13 +75,13 @@ def render_word_by_level(data, days=60, max_y_labels=15, simulate=False, style=D
     notice('Chart \'words_by_level\' successfully exported.')
 
 
-def render_progress(data, days=60, max_y_labels=15, simulate=False, style=DefaultStyle):
+def render_progress(data, days=60, max_y_labels=15, simulation_mode=False, style=DefaultStyle):
     ''' Function: Renders the progress chart '''
     chart = pygal.Histogram()
 
     # Chart Data
     data_copy = [i for i in data]
-    if simulate:
+    if simulation_mode:
         data_copy = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
 
     for i in range(0, 13, 3):
@@ -113,13 +117,16 @@ def render_progress(data, days=60, max_y_labels=15, simulate=False, style=Defaul
     notice('Chart \'progress\' successfully exported.')
 
 
-def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, simulate=False, style=DefaultStyle):
+def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, show_correlation=False, simulation_mode=False, style=DefaultStyle):
     ''' Function: Renders the estimated flashcards per day chart '''
+    # pb = ProgressBar(total=100, prefix='[NOTICE]', suffix='', decimals=2, length=50, fill='=', zfill='-')
+    # pb.print_progress_bar(0)
+
     chart = pygal.Line()
 
     # Chart Data
     data_copy = [i for i in data]
-    if simulate:
+    if simulation_mode:
         data_copy = [0 for _ in range(13)]
 
     learn_patterns = [
@@ -133,6 +140,19 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
     for i, j in learn_patterns:
         estimated_list.append([sum(k) for k in estimated(data_copy, days=days, incorrect_p=incorrect_p, learn_pattern=j, result='flashcard')])
         chart.add(i, [None] + estimated_list[-1], allow_interruptions=True, stroke=True)
+
+    # Correlation
+    for i in range(len(estimated_list) * show_correlation):
+        x = numpy.array([[j] for j in range(1, len(estimated_list[i]) + 1)])
+        y = numpy.array(estimated_list[i])
+
+        poly_f = PolynomialFeatures(degree = 3)
+        x = poly_f.fit_transform(x)
+
+        regressor = LinearRegression()
+        regressor.fit(x, y)
+
+        chart.add('Correlation-{}'.format((0, 10, 20)[i]), [None] + regressor.predict(x).tolist(), stroke_style={'width': 4}, show_dots=False)
 
     # Chart Titles
     chart.title = 'Estimated Flashcards Per Day'
@@ -166,9 +186,9 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
         bp = 60     # Data amount which dots started shrinking
         factor = 3  # Closer to 1, slower the dots shart shinking. If at 1, dots will never shrink.
         chart.dots_size = 2.5 * ((bp + max(0, days - bp) / factor) / max(bp, days))
-        
-    chart.render_to_file('charts/estimated.svg')
 
+    chart.render_to_file('charts/estimated.svg')
+    
     # Notice
     notice('Chart \'estimated\' successfully exported.')
 
