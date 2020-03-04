@@ -61,7 +61,7 @@ def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style
 
     # Chart Labels
     chart.x_labels = ['{}-{}'.format(i // 3 + 1, i % 3) for i in range(len(data_word))]
-    chart.y_labels = y_labels(0, max(max(data_word), max(data_kanji)), max_y_labels=max_y_labels)
+    chart.y_labels = y_labels(0, max(data['overall']), max_y_labels=max_y_labels)
     
     # Chart Legends
     chart.show_legend = False
