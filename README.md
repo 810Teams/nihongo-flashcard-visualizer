@@ -9,14 +9,14 @@ Nihongo is a Japanese dictionary and flashcard application available on iOS devi
 Download on [AppStore](https://apps.apple.com/us/app/nihongo-japanese-dictionary/id881697245) (Requires iOS 12.4 or newer)
 
 ## System Requirements
-Nihongo Flashcard Visualizer requires Python 3.6 or newer, with pygal library installed.
+Nihongo Flashcard Visualizer requires Python 3.6 or newer, with pygal and scikit-learn library installed.
 
-This application is not guaranteed to be able to run on Windows, works fine on MacOS Catalina (10.15).
+This application is not guaranteed to be able to run on Windows. However, it works fine on MacOS Catalina (10.15).
 
-### Install Python
+### Installing Python
 Python can be installed from various sources, recommended methods are [python.org](https://www.python.org/downloads/) and [anaconda.com](https://www.anaconda.com/distribution/#download-section).
 
-### Install pygal
+### Installing Libraries
 Install with `requirements.txt`
 ```shell
 pip install -r requirements.txt
@@ -25,6 +25,7 @@ pip install -r requirements.txt
 Install the library directly
 ```shell
 pip install pygal
+pip install scikit-learn
 ```
 
 ## User Manual
