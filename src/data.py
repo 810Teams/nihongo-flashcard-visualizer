@@ -32,29 +32,42 @@ def create_connection():
     return conn
 
 
-def get_progress(conn):
+def get_progress():
     ''' Function: Gets flashcard progress from database '''
+    conn = create_connection()
     cur = conn.cursor()
-    cur.execute('SELECT ZPROGRESS, ZBECAMEACTIVEDATE, ZKANJITEXT FROM ZFLASHCARD')
+    cur.execute('SELECT ZPROGRESS, ZSTATUSASINT, ZKANJITEXT FROM ZFLASHCARD')
 
-    return [i[0] for i in cur.fetchall() if i[1] != None and i[2] == None]
+    data = cur.fetchall()
+
+    return {
+        'word': [i[0] for i in data if bool(i[1]) and i[2] == None],
+        'kanji': [i[0] for i in data if bool(i[1]) and i[2] != None],
+        'overall': [i[0] for i in data if bool(i[1])]
+    }
 
 
 def get_raw_data():
     ''' Function: Get raw data '''
     try:
-        raw_data = get_progress(create_connection())
+        raw_data = get_progress()
     except sqlite3.OperationalError:
         error('SQLite file not found. Beginning the extraction.')
         print()
         extract()
         print()
-        raw_data = get_progress(create_connection())
+        raw_data = get_progress()
 
-    return sorted(raw_data)
+    return raw_data
 
 
 def get_processed_data():
     ''' Function: Get processed data '''
     raw_data = get_raw_data()
-    return [raw_data.count(i) for i in range(0, 13)]
+
+    raw_data_new = dict()
+
+    for i in raw_data:
+        raw_data_new[i] = [raw_data[i].count(j) for j in range(0, 13)]
+
+    return raw_data_new

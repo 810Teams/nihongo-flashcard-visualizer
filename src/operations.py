@@ -173,11 +173,18 @@ def operate_extract(raw_data, args):
 
 def operate_stat(raw_data, args):
     ''' Function: Operation Code 'S' (View Statistics) '''
-    notice('Total: {}'.format(len(raw_data)))
-    notice('Median: {}'.format(level_format(median(raw_data), initial_level=1, remainder=True)))
-    notice('Average: {}'.format(level_format(average(raw_data), initial_level=1, remainder=True)))
-    notice('Standard Deviation: {}'.format(level_format(standard_dev(raw_data), initial_level=0, remainder=True)))
-    notice('Progress Coverage: {:.2f}%'.format(progress_coverage(raw_data) * 100))
+    j = 0
+    for i in ('word', 'kanji'):
+        print(' - {} Statistics -'.format(i.capitalize()))
+        print('   Total: {}'.format(len(raw_data[i])))
+        print('   Median: {}'.format(level_format(median(raw_data[i]), initial_level=1, remainder=True)))
+        print('   Average: {}'.format(level_format(average(raw_data[i]), initial_level=1, remainder=True)))
+        print('   Standard Deviation: {}'.format(level_format(standard_dev(raw_data[i]), initial_level=0, remainder=True)))
+        print('   Progress Coverage: {:.2f}%'.format(progress_coverage(raw_data[i]) * 100))
+            
+        if j + 1 < 2:
+            print()
+            j += 1
 
 
 def operate_exit(raw_data, args):
