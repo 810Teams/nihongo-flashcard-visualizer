@@ -37,9 +37,9 @@ def render(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, sho
     time_start = perf_counter()
 
     render_by_level(data, days=days, max_y_labels=max_y_labels, simulation_mode=simulation_mode, style=eval(style))
-    render_progress(data, days=days, max_y_labels=max_y_labels, simulation_mode=simulation_mode, style=eval(style))
     render_estimated(data, days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, show_correlation=show_correlation, simulation_mode=simulation_mode, style=eval(style))
-    
+    render_progress(data, days=days, max_y_labels=max_y_labels, simulation_mode=simulation_mode, style=eval(style))
+        
     notice('Total time spent rendering charts is {:.2f} seconds.'.format(perf_counter() - time_start))
 
 
@@ -72,48 +72,6 @@ def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style
 
     # Notice
     notice('Chart \'by_level\' successfully exported.')
-
-
-def render_progress(data, days=60, max_y_labels=15, simulation_mode=False, style=DefaultStyle):
-    ''' Function: Renders the progress chart '''
-    chart = pygal.Histogram()
-
-    # Chart Data
-    data_copy = [i for i in data['word']]
-    if simulation_mode:
-        data_copy = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
-
-    for i in range(0, 13, 3):
-        chart.add(
-            'Level {:.0f}'.format(i//3 + 1),
-            [{
-                'value': (round((i + j) / 3 + 1, 2), sum(data_copy[:i + j + 1]) - data_copy[i + j], sum(data_copy[:i + j + 1])),
-                'label': '{:.2f}%'.format(data_copy[i + j] / (sum(data_copy) + (sum(data_copy) == 0)) * 100)
-            } for j in range(len(data_copy[i:i + 3]))],
-            formatter=lambda x: '{}'.format(x[2] - x[1])
-        )
-
-    # Chart Titles
-    chart.title = 'Word Progress'
-    chart.x_title = 'Words'
-
-    # Chart Labels
-    chart.x_labels = range(1, sum(data_copy) + 1)
-    chart.x_labels_major_count = 8
-    chart.show_minor_x_labels = False
-    chart.y_labels = [0, 1, 2, 3, 4, 5]
-    chart.truncate_label = -1
-
-    # Chart Legends
-    chart.show_legend = True
-    
-    # Chart Render
-    chart.style = style
-    chart.dots_size = 2
-    chart.render_to_file('charts/progress.svg')
-
-    # Notice
-    notice('Chart \'progress\' successfully exported.')
 
 
 def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, show_correlation=False, simulation_mode=False, style=DefaultStyle):
@@ -187,6 +145,48 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
     
     # Notice
     notice('Chart \'estimated\' successfully exported.')
+
+
+def render_progress(data, days=60, max_y_labels=15, simulation_mode=False, style=DefaultStyle):
+    ''' Function: Renders the progress chart '''
+    chart = pygal.Histogram()
+
+    # Chart Data
+    data_copy = [i for i in data['word']]
+    if simulation_mode:
+        data_copy = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
+
+    for i in range(0, 13, 3):
+        chart.add(
+            'Level {:.0f}'.format(i//3 + 1),
+            [{
+                'value': (round((i + j) / 3 + 1, 2), sum(data_copy[:i + j + 1]) - data_copy[i + j], sum(data_copy[:i + j + 1])),
+                'label': '{:.2f}%'.format(data_copy[i + j] / (sum(data_copy) + (sum(data_copy) == 0)) * 100)
+            } for j in range(len(data_copy[i:i + 3]))],
+            formatter=lambda x: '{}'.format(x[2] - x[1])
+        )
+
+    # Chart Titles
+    chart.title = 'Word Progress'
+    chart.x_title = 'Words'
+
+    # Chart Labels
+    chart.x_labels = range(1, sum(data_copy) + 1)
+    chart.x_labels_major_count = 8
+    chart.show_minor_x_labels = False
+    chart.y_labels = [0, 1, 2, 3, 4, 5]
+    chart.truncate_label = -1
+
+    # Chart Legends
+    chart.show_legend = True
+    
+    # Chart Render
+    chart.style = style
+    chart.dots_size = 2
+    chart.render_to_file('charts/progress.svg')
+
+    # Notice
+    notice('Chart \'progress\' successfully exported.')
 
 
 def y_labels(data_min, data_max, max_y_labels=15, skip=False):
