@@ -53,8 +53,8 @@ def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style
     if simulation_mode:
         data_word = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
         
-    chart.add('Learned Words', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_word) + (sum(data_word) == 0)) * 100)} for i in data_word])
-    chart.add('Learned Kanjis', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_kanji) + (sum(data_kanji) == 0)) * 100)} for i in data_kanji])
+    chart.add('Words', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_word) + (sum(data_word) == 0)) * 100)} for i in data_word])
+    chart.add('Kanjis', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_kanji) + (sum(data_kanji) == 0)) * 100)} for i in data_kanji])
 
     # Chart Titles
     chart.title = 'Learned Words & Kanjis by Level'
@@ -64,7 +64,9 @@ def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style
     chart.y_labels = y_labels(0, max(data['overall']), max_y_labels=max_y_labels)
     
     # Chart Legends
-    chart.show_legend = False
+    chart.show_legend = True
+    chart.legend_at_bottom = False
+    chart.legend_box_size = 15
 
     # Chart Render
     chart.style = style
@@ -86,7 +88,7 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
     learn_patterns = [
         ('Never Study', [0]),
         ('10 Per Day', [10]),
-        ('20 Per Day', [20])
+        ('20 Per Day', [20]),
     ]
 
     estimated_list = list()
@@ -106,7 +108,7 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
         regressor = LinearRegression()
         regressor.fit(x, y)
 
-        chart.add('Correlation-{}'.format((0, 10, 20)[i]), [None] + regressor.predict(x).tolist(), stroke_style={'width': 4}, show_dots=False)
+        chart.add('Correl-{}'.format((0, 10, 20)[i]), [None] + regressor.predict(x).tolist(), stroke_style={'width': 4}, show_dots=False)
 
     # Chart Titles
     chart.title = 'Estimated Flashcards Per Day'
@@ -129,8 +131,7 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
     # Chart Legends
     chart.show_legend = True
     chart.legend_at_bottom = False
-    chart.legend_at_bottom_columns = 4
-    chart.legend_box_size = 16
+    chart.legend_box_size = 15
 
     # Chart Render
     chart.style = style
@@ -179,6 +180,8 @@ def render_progress(data, days=60, max_y_labels=15, simulation_mode=False, style
 
     # Chart Legends
     chart.show_legend = True
+    chart.legend_at_bottom = False
+    chart.legend_box_size = 15
     
     # Chart Render
     chart.style = style
