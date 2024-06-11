@@ -1,35 +1,24 @@
-'''
+"""
     Nihongo - Japanese Dictionary Application
     Flashcard Progress Visualizer
 
     GitHub: https://github.com/810Teams/nihongo-flashcard-visualizer
-'''
+"""
 
-from math import ceil
-from math import floor
-from math import sqrt
+from math import ceil, floor, sqrt
 
 from src.data import get_raw_data
-from src.operations import Operation
-from src.operations import Argument
-from src.operations import operate_chart
-from src.operations import operate_extract
-from src.operations import operate_stat
-from src.operations import operate_exit
+from src.operations import Operation, Argument, operate_chart, operate_extract, operate_stat, operate_exit
 from src.render import render
-from src.statistics import average
-from src.statistics import median
-from src.statistics import standard_dev
-from src.utils import error
-from src.utils import notice
-from src.utils import level_format
+from src.stats import average, median, standard_dev
+from src.utils import error, notice, level_format
 
 import os
 
 
 APP_NAME = 'Nihongo Flashcard Visualizer'
 AUTHOR = '810Teams'
-VERSION = 'v2.0.3'
+VERSION = 'v2.0.4'
 OPERATIONS = [
     Operation('c', 'chart', 'Create Charts', [
         Argument('-days INTEGER', 'Duration (Default: 30)'),
@@ -49,7 +38,7 @@ OPERATIONS = [
 
 
 def main():
-    ''' Main Function '''
+    """ Main Function """
     run_check()
     show_app_title()
     show_operations()
@@ -57,7 +46,7 @@ def main():
 
 
 def run_check():
-    ''' Function: Run checking '''
+    """ Function: Run checking """
     if not os.path.exists('NihongoBackup.nihongodata'):
         print()
         error('Nihongo backup file not found. Unable to start application.')
@@ -66,14 +55,14 @@ def run_check():
 
 
 def show_app_title():
-    ''' Function: Show application title '''
+    """ Function: Show application title """
     print()
     print('- {} -'.format(APP_NAME))
     print(('by {} ({})'.format(AUTHOR, VERSION)).center(len(APP_NAME) + 4))
 
 
 def show_operations():
-    ''' Function: Show operation list '''
+    """ Function: Show operation list """
     print()
     print('- Operation List -')
 
@@ -84,7 +73,7 @@ def show_operations():
 
 
 def start_operating():
-    ''' Function: Start operating application '''
+    """ Function: Start operating application """
     while True:
         print()
         try:
@@ -96,13 +85,13 @@ def start_operating():
 
 
 def operate(action, args):
-    ''' Function: Operate a specific action '''
+    """ Function: Operate a specific action """
     try:
         eval('operate_{}(get_raw_data(), args)'.format(action.lower()))
     except (NameError, SyntaxError):
         try:
             eval('operate_{}(get_raw_data(), args)'.format([i.command for i in OPERATIONS if i.code == action.lower()][0]))
-        except (IndexError, NameError, SyntaxError): 
+        except (IndexError, NameError, SyntaxError):
             error('Invalid action. Please try again.')
 
 

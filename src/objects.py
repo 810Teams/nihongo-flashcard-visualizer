@@ -1,6 +1,6 @@
-'''
+"""
     `objects.py`
-'''
+"""
 
 from random import choices
 

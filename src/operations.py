@@ -1,18 +1,12 @@
-'''
+"""
     `operations.py`
-'''
+"""
 
-from src.data import extract
-from src.data import get_processed_data
+from src.data import extract, get_processed_data
 from src.loaders import load_default_style
 from src.render import render
-from src.statistics import average
-from src.statistics import median
-from src.statistics import standard_dev
-from src.statistics import progress_coverage
-from src.utils import error
-from src.utils import notice
-from src.utils import level_format
+from src.stats import average, median, standard_dev, progress_coverage
+from src.utils import error, notice, level_format
 
 import os
 
@@ -41,7 +35,7 @@ class Operation:
         self.command = command
         self.title = title
         self.args = args
-    
+
     def operate(self, raw_data, args):
         try:
             eval('operate_{}(raw_data, args)'.format(self.command.lower()))
@@ -56,7 +50,7 @@ class Argument:
 
 
 def operate_chart(raw_data, args):
-    ''' Function: Operation Code 'C' (Create Charts) '''
+    """ Function: Operation Code 'C' (Create Charts) """
     # Step 1: -open-only argument
     if '-open-only' in args:
         try:
@@ -81,7 +75,7 @@ def operate_chart(raw_data, args):
             return
     else:
         days = 60
-    
+
     # Step 3: -incorrect-p argument
     if '-inc-p' in args:
         # Step 3.1 - Test for valid format
@@ -97,7 +91,7 @@ def operate_chart(raw_data, args):
             return
     else:
         incorrect_p = 0.0
-    
+
     # Step 4: -max-y argument
     if '-max-y' in args:
         # Step 4.1 - Test for valid format
@@ -107,7 +101,7 @@ def operate_chart(raw_data, args):
             error('Maximum y labels must be an integer.')
             error('Aborting chart creation process.')
             return
-        
+
         # Step 4.2 - Test for valid requirements
         if not (max_y_labels >= 2):
             error('Maximum y labels must be an integer at least 2.')
@@ -144,7 +138,7 @@ def operate_chart(raw_data, args):
         notice('Style \'{}\' will be used in chart creation.'.format(style))
     else:
         style = 'DefaultStyle'
-    
+
     # Step 6: Rendering
     render(
         get_processed_data(),
@@ -156,7 +150,7 @@ def operate_chart(raw_data, args):
         simulation_mode=('-simulate' in args),
         style=style
     )
-    
+
     # Step 7: -open argument
     if '-open' in args:
         try:
@@ -167,12 +161,12 @@ def operate_chart(raw_data, args):
 
 
 def operate_extract(raw_data, args):
-    ''' Function: Operation Code 'E' (Extract) '''
+    """ Function: Operation Code 'E' (Extract) """
     extract()
 
 
 def operate_stat(raw_data, args):
-    ''' Function: Operation Code 'S' (View Statistics) '''
+    """ Function: Operation Code 'S' (View Statistics) """
     j = 0
     for i in ('word', 'kanji'):
         print(' - {} Statistics -'.format(i.capitalize()))
@@ -181,14 +175,14 @@ def operate_stat(raw_data, args):
         print('   Average: {}'.format(level_format(average(raw_data[i]), initial_level=1, remainder=True)))
         print('   Standard Deviation: {}'.format(level_format(standard_dev(raw_data[i]), initial_level=0, remainder=True)))
         print('   Progress Coverage: {:.2f}%'.format(progress_coverage(raw_data[i]) * 100))
-            
+
         if j + 1 < 2:
             print()
             j += 1
 
 
 def operate_exit(raw_data, args):
-    ''' Function: Operation Code 'X' (Exit) '''
+    """ Function: Operation Code 'X' (Exit) """
     notice('Exitting application.')
     print()
     exit()

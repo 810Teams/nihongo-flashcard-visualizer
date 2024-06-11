@@ -1,6 +1,6 @@
-'''
+"""
     `data.py`
-'''
+"""
 
 from src.utils import error
 from src.utils import notice
@@ -14,7 +14,7 @@ DATABASE_FILE = 'Flashcards.sqlite'
 
 
 def extract():
-    ''' Function: Extracts database file from the zip '''
+    """ Function: Extracts database file from the zip """
     try:
         os.system('unzip -o {}/{}.zip'.format(DATABASE_CONTAINER, DATABASE_FILE))
     except (FileNotFoundError, OSError, PermissionError):
@@ -22,7 +22,7 @@ def extract():
 
 
 def create_connection():
-    ''' Function: Creates the database connection '''
+    """ Function: Creates the database connection """
     conn = None
     try:
         conn = sqlite3.connect('{}'.format(DATABASE_FILE))
@@ -33,7 +33,7 @@ def create_connection():
 
 
 def get_progress():
-    ''' Function: Gets flashcard progress from database '''
+    """ Function: Gets flashcard progress from database """
     conn = create_connection()
     cur = conn.cursor()
     cur.execute('SELECT ZPROGRESS, ZSTATUSASINT, ZKANJITEXT FROM ZFLASHCARD')
@@ -48,7 +48,7 @@ def get_progress():
 
 
 def get_raw_data():
-    ''' Function: Get raw data '''
+    """ Function: Get raw data """
     try:
         raw_data = get_progress()
     except sqlite3.OperationalError:
@@ -62,7 +62,7 @@ def get_raw_data():
 
 
 def get_processed_data():
-    ''' Function: Get processed data '''
+    """ Function: Get processed data """
     raw_data = get_raw_data()
 
     raw_data_new = dict()

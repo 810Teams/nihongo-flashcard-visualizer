@@ -1,9 +1,8 @@
-'''
+"""
     `render.py`
-'''
+"""
 
-from math import ceil
-from math import floor
+from math import ceil, floor
 from pygal.style import DefaultStyle
 from pygal.style import DarkStyle
 from pygal.style import NeonStyle
@@ -23,7 +22,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 from time import perf_counter
 
-from src.statistics import estimated
+from src.stats import estimated
 from src.utils import notice
 from src.utils import level_format
 
@@ -33,18 +32,18 @@ import pygal
 
 
 def render(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, show_correlation=False, simulation_mode=False, style='DefaultStyle'):
-    ''' Function: Renders the chart '''
+    """ Function: Renders the chart """
     time_start = perf_counter()
 
     render_by_level(data, days=days, max_y_labels=max_y_labels, simulation_mode=simulation_mode, style=eval(style))
     render_estimated(data, days=days, dot_shrink=dot_shrink, incorrect_p=incorrect_p, max_y_labels=max_y_labels, show_correlation=show_correlation, simulation_mode=simulation_mode, style=eval(style))
     render_progress(data, days=days, max_y_labels=max_y_labels, simulation_mode=simulation_mode, style=eval(style))
-        
+
     notice('Total time spent rendering charts is {:.2f} seconds.'.format(perf_counter() - time_start))
 
 
 def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style=DefaultStyle):
-    ''' Function: Renders the words and kanji by level chart '''
+    """ Function: Renders the words and kanji by level chart """
     chart = pygal.HorizontalStackedBar()
 
     # Chart Data
@@ -52,7 +51,7 @@ def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style
     data_kanji = [i for i in data['kanji']]
     if simulation_mode:
         data_word = estimated([0 for _ in range(13)], days=days, learn_pattern=[10], result='vocabulary')[-1]
-        
+
     chart.add('Words', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_word) + (sum(data_word) == 0)) * 100)} for i in data_word])
     chart.add('Kanjis', [{'value': i, 'label': '{:.2f}%'.format(i / (sum(data_kanji) + (sum(data_kanji) == 0)) * 100)} for i in data_kanji])
 
@@ -62,7 +61,7 @@ def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style
     # Chart Labels
     chart.x_labels = ['{}-{}'.format(i // 3 + 1, i % 3) for i in range(len(data_word))]
     chart.y_labels = y_labels(0, max(data['overall']), max_y_labels=max_y_labels)
-    
+
     # Chart Legends
     chart.show_legend = True
     chart.legend_at_bottom = False
@@ -77,7 +76,7 @@ def render_by_level(data, days=60, max_y_labels=15, simulation_mode=False, style
 
 
 def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labels=15, show_correlation=False, simulation_mode=False, style=DefaultStyle):
-    ''' Function: Renders the estimated flashcards per day chart '''
+    """ Function: Renders the estimated flashcards per day chart """
     chart = pygal.Line()
 
     # Chart Data
@@ -127,7 +126,7 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
     )
 
     chart.truncate_label = -1
-    
+
     # Chart Legends
     chart.show_legend = True
     chart.legend_at_bottom = False
@@ -143,13 +142,13 @@ def render_estimated(data, days=60, dot_shrink=True, incorrect_p=0.0, max_y_labe
         chart.dots_size = 2.5 * ((bp + max(0, days - bp) / factor) / max(bp, days))
 
     chart.render_to_file('charts/estimated.svg')
-    
+
     # Notice
     notice('Chart \'estimated\' successfully exported.')
 
 
 def render_progress(data, days=60, max_y_labels=15, simulation_mode=False, style=DefaultStyle):
-    ''' Function: Renders the progress chart '''
+    """ Function: Renders the progress chart """
     chart = pygal.Histogram()
 
     # Chart Data
@@ -182,7 +181,7 @@ def render_progress(data, days=60, max_y_labels=15, simulation_mode=False, style
     chart.show_legend = True
     chart.legend_at_bottom = False
     chart.legend_box_size = 15
-    
+
     # Chart Render
     chart.style = style
     chart.dots_size = 2
@@ -193,12 +192,12 @@ def render_progress(data, days=60, max_y_labels=15, simulation_mode=False, style
 
 
 def y_labels(data_min, data_max, max_y_labels=15, skip=False):
-    ''' Function: Calculates y labels of the chart '''
+    """ Function: Calculates y labels of the chart """
     data_min = floor(data_min)
     data_max = ceil(data_max)
-    
+
     preset = 1, 2, 5
-    
+
     if not skip:
         data_range = list(range(0, data_min - 1, -1)) + list(range(0, data_max + 1, 1))
         i = 0
@@ -215,7 +214,7 @@ def y_labels(data_min, data_max, max_y_labels=15, skip=False):
         while len(data_range) > max_y_labels:
             data_range = list(range(data_min, data_max + preset[i % 3] * 10 ** (i // 3), preset[i % 3] * 10 ** (i // 3)))
             i += 1
-        
+
     data_range.sort()
 
     return data_range
